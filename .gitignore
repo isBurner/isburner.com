@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build
+.next/
+dist/
+.turbo/
+out/
+
+# env
+.env
+.env.local
+.env.*.local
+.envrc-token
+.dev.vars
+
+# editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# os
+.DS_Store
+Thumbs.db
+
+# debug
+npm-debug.log*
+
+# typescript
+*.tsbuildinfo
+
+# wrangler
+.wrangler/
