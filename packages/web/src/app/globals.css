@@ -1,53 +1,218 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-bg: #0a0a0a;
-  --color-bg-surface: #141414;
-  --color-bg-elevated: #1a1a1a;
-  --color-bg-hover: #222222;
+  --color-bg: #06060a;
+  --color-bg-surface: #0e0e14;
+  --color-bg-elevated: #14141c;
+  --color-bg-hover: #1a1a24;
 
-  --color-border: #2a2a2a;
-  --color-border-bright: #3a3a3a;
+  --color-border: #1e1e2a;
+  --color-border-bright: #2a2a3a;
 
-  --color-text: #e5e5e5;
-  --color-text-muted: #888888;
-  --color-text-faint: #555555;
+  --color-text: #e2e2ea;
+  --color-text-muted: #8a8a9a;
+  --color-text-faint: #4a4a58;
 
   --color-accent: #00ff88;
   --color-accent-dim: #00cc6a;
-  --color-accent-bg: #00ff8810;
+  --color-accent-subtle: #00ff8810;
 
-  --color-error: #ff4444;
+  --color-error: #ff4455;
   --color-warning: #ffaa00;
+  --color-safe: #00ff88;
 
-  --font-sans: 'Geist Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), 'JetBrains Mono', monospace;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  code,
+  pre {
+    font-family: var(--font-mono);
+  }
 }
 
-html {
-  color-scheme: dark;
+@layer components {
+  /* ---- Background grid ---- */
+  .bg-grid {
+    background-image: radial-gradient(circle, #ffffff06 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ---- Glow effects ---- */
+  .glow-accent {
+    box-shadow:
+      0 0 20px #00ff8815,
+      0 0 60px #00ff8808;
+  }
+
+  .glow-accent-strong {
+    box-shadow:
+      0 0 30px #00ff8820,
+      0 0 80px #00ff8810,
+      inset 0 0 40px #00ff8806;
+  }
+
+  .text-glow {
+    text-shadow:
+      0 0 40px #00ff8850,
+      0 0 80px #00ff8820;
+  }
+
+  /* ---- Terminal window ---- */
+  .terminal {
+    background: #0a0a12;
+    border: 1px solid #1a1a28;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .terminal-bar {
+    background: #0f0f18;
+    border-bottom: 1px solid #1a1a28;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .terminal-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .terminal-body {
+    padding: 24px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* ---- Cursor blink ---- */
+  .cursor-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  /* ---- Page entrance animations ---- */
+  .boot-in {
+    animation: bootIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .d1 { animation-delay: 0.05s; }
+  .d2 { animation-delay: 0.12s; }
+  .d3 { animation-delay: 0.2s; }
+  .d4 { animation-delay: 0.3s; }
+  .d5 { animation-delay: 0.42s; }
+
+  .terminal-enter {
+    animation: terminalDrop 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  }
+
+  .hud-slide {
+    animation: hudSlide 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* ---- Scan line (very subtle) ---- */
+  .scanline::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      #00ff8802 2px,
+      #00ff8802 4px
+    );
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* ---- Noise texture overlay ---- */
+  .noise::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    pointer-events: none;
+    z-index: 50;
+  }
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Keyframes must be outside @layer */
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
-::selection {
-  background: var(--color-accent);
-  color: var(--color-bg);
+@keyframes bootIn {
+  0% {
+    opacity: 0;
+    filter: blur(4px) brightness(2);
+  }
+  40% {
+    opacity: 1;
+    filter: blur(0px) brightness(1.3);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px) brightness(1);
+  }
 }
 
-code,
-pre {
-  font-family: var(--font-mono);
+@keyframes terminalDrop {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(-8px);
+    filter: brightness(1.5);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes hudSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
