@@ -10,7 +10,7 @@ const organizationSchema = {
   '@type': 'Organization',
   name: 'isBurner',
   url: SITE_URL,
-  logo: `${SITE_URL}/favicon.svg`,
+  logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.svg`, width: 512, height: 512 },
   description: 'Disposable email detection API for developers.',
   sameAs: ['https://github.com/isBurner'],
 };
@@ -26,11 +26,11 @@ const webSiteSchema = {
 
 const productSchema = {
   '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
+  '@type': 'Product',
   name: 'isBurner API',
-  applicationCategory: 'DeveloperApplication',
-  operatingSystem: 'Any',
   url: SITE_URL,
+  image: `${SITE_URL}/og-image.png`,
+  brand: { '@type': 'Organization', name: 'isBurner' },
   description:
     'Disposable email detection API. 30,000+ known domains, MX heuristics, sub-5ms response.',
   offers: [
@@ -40,14 +40,24 @@ const productSchema = {
       price: '0',
       priceCurrency: 'USD',
       description: '1,000 lookups/mo, 10 req/sec',
+      availability: 'https://schema.org/InStock',
+      url: `${SITE_URL}/pricing`,
     },
     {
       '@type': 'Offer',
       name: 'Starter',
       price: '5.00',
       priceCurrency: 'USD',
-      billingIncrement: 'P1M',
       description: '25,000 lookups/mo, 50 req/sec, MX heuristic analysis',
+      availability: 'https://schema.org/InStock',
+      url: `${SITE_URL}/pricing`,
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: '5.00',
+        priceCurrency: 'USD',
+        billingDuration: 'P1M',
+        unitText: 'MONTH',
+      },
     },
   ],
 };
@@ -346,6 +356,14 @@ function Pricing() {
               </a>
             </div>
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <a
+            href="/pricing"
+            className="font-mono text-sm text-text-muted transition-colors hover:text-accent"
+          >
+            Compare plans in detail &rarr;
+          </a>
         </div>
       </div>
     </section>
