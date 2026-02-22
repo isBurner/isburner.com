@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     description:
       'Is this email trash? One API call to find out. 30,000+ known domains, MX heuristics, sub-5ms response.',
   },
+  alternates: {
+    canonical: SITE_URL,
+  },
   robots: {
     index: true,
     follow: true,
