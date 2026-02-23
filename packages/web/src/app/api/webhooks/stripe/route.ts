@@ -141,8 +141,9 @@ export async function POST(req: Request) {
           },
         });
 
-      // Update user tier and ensure stripeSubscriptionId is set
-      if (sub.status === 'active' || sub.status === 'trialing') {
+      // Update user tier and ensure stripeSubscriptionId is set.
+      // Keep access during past_due to allow Stripe's dunning/retry to recover payment.
+      if (sub.status === 'active' || sub.status === 'trialing' || sub.status === 'past_due') {
         await db
           .update(users)
           .set({ tier, stripeSubscriptionId: sub.id, updatedAt: new Date() })
