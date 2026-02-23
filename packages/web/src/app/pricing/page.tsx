@@ -42,6 +42,7 @@ const productSchema = {
   description:
     'Disposable email detection API. 30,000+ known domains, MX heuristic analysis, sub-5ms response.',
   url: `${SITE_URL}/pricing`,
+  image: `${SITE_URL}/og-image.png`,
   brand: { '@type': 'Organization', name: 'isBurner' },
   offers: [
     {
@@ -51,15 +52,23 @@ const productSchema = {
       priceCurrency: 'USD',
       description: '1,000 lookups/mo, 10 req/sec, blocklist detection, email support',
       availability: 'https://schema.org/InStock',
+      url: `${SITE_URL}/pricing`,
     },
     {
       '@type': 'Offer',
       name: 'Starter',
       price: '5.00',
       priceCurrency: 'USD',
-      billingIncrement: 'P1M',
       description: '25,000 lookups/mo, 50 req/sec, MX heuristic analysis, usage dashboard',
       availability: 'https://schema.org/InStock',
+      url: `${SITE_URL}/pricing`,
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: '5.00',
+        priceCurrency: 'USD',
+        billingDuration: 'P1M',
+        unitText: 'MONTH',
+      },
     },
   ],
 };
