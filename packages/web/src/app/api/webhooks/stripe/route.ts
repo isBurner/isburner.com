@@ -91,24 +91,53 @@ export async function POST(req: Request) {
 
     case 'customer.subscription.updated': {
       const sub = event.data.object;
-      const userId = await getUserIdFromSubscription(sub.id);
+      let userId = await getUserIdFromSubscription(sub.id);
+
+      // If this subscription isn't in our DB yet (price swap on existing sub),
+      // look up the user by their stripeSubscriptionId on the users table
+      if (!userId) {
+        const user = await db.query.users.findFirst({
+          where: eq(users.stripeSubscriptionId, sub.id),
+        });
+        userId = user?.id ?? null;
+      }
       if (!userId) break;
 
       const period = getSubPeriod(sub);
+      const tier = tierFromPriceId(sub.items.data[0].price.id);
 
+      // Upsert subscription record (handles both new and updated)
       await db
-        .update(subscriptions)
-        .set({
+        .insert(subscriptions)
+        .values({
+          id: sub.id,
+          userId,
+          stripePriceId: sub.items.data[0].price.id,
           status: sub.status as typeof subscriptions.$inferInsert.status,
           currentPeriodStart: period.start,
           currentPeriodEnd: period.end,
           cancelAtPeriodEnd: sub.cancel_at_period_end,
-          updatedAt: new Date(),
         })
-        .where(eq(subscriptions.id, sub.id));
+        .onConflictDoUpdate({
+          target: subscriptions.id,
+          set: {
+            stripePriceId: sub.items.data[0].price.id,
+            status: sub.status as typeof subscriptions.$inferInsert.status,
+            currentPeriodStart: period.start,
+            currentPeriodEnd: period.end,
+            cancelAtPeriodEnd: sub.cancel_at_period_end,
+            updatedAt: new Date(),
+          },
+        });
 
-      // If subscription is no longer active, downgrade
-      if (sub.status !== 'active' && sub.status !== 'trialing') {
+      // Update user tier and ensure stripeSubscriptionId is set
+      if (sub.status === 'active' || sub.status === 'trialing') {
+        await db
+          .update(users)
+          .set({ tier, stripeSubscriptionId: sub.id, updatedAt: new Date() })
+          .where(eq(users.id, userId));
+        await syncActiveKeys(userId, tier);
+      } else {
         await downgradeUser(userId);
       }
       break;
