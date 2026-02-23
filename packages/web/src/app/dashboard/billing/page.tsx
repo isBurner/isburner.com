@@ -1,29 +1,43 @@
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
-import { users, subscriptions } from '@/lib/db/schema';
+import { subscriptions } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { stripe } from '@/lib/stripe';
 import { TIER_CONFIG, type Tier } from '@/lib/tier-config';
+import { ensureUser } from '@/lib/ensure-user';
 import PlanBadge from '@/components/dashboard/PlanBadge';
 import UpgradeButton from '@/components/dashboard/UpgradeButton';
 import ManageSubscriptionButton from '@/components/dashboard/ManageSubscriptionButton';
 
-export default async function BillingPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
+async function getSubscriptionDetails(stripeSubscriptionId: string) {
+  // Try local DB first
+  const local = await db.query.subscriptions.findFirst({
+    where: eq(subscriptions.id, stripeSubscriptionId),
   });
-  if (!user) redirect('/sign-in');
+  if (local) return local;
+
+  // Fall back to Stripe directly
+  try {
+    const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const item = sub.items.data[0];
+    return {
+      status: sub.status,
+      currentPeriodStart: new Date(item.current_period_start * 1000),
+      currentPeriodEnd: new Date(item.current_period_end * 1000),
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export default async function BillingPage() {
+  const user = await ensureUser();
 
   const tier = user.tier as Tier;
   const config = TIER_CONFIG[tier];
 
   const subscription = user.stripeSubscriptionId
-    ? await db.query.subscriptions.findFirst({
-        where: eq(subscriptions.id, user.stripeSubscriptionId),
-      })
+    ? await getSubscriptionDetails(user.stripeSubscriptionId)
     : null;
 
   return (
@@ -46,20 +60,12 @@ export default async function BillingPage() {
             <span className="font-mono text-3xl font-bold">{config.name}</span>
           </div>
           <ul className="mb-6 space-y-2">
-            <li className="flex items-center gap-2 text-sm text-text-muted">
-              <span className="font-mono text-accent">+</span>
-              {config.monthlyLimit.toLocaleString()} lookups/mo
-            </li>
-            <li className="flex items-center gap-2 text-sm text-text-muted">
-              <span className="font-mono text-accent">+</span>
-              {config.rateLimit} req/sec
-            </li>
-            {config.mxAnalysis && (
-              <li className="flex items-center gap-2 text-sm text-text-muted">
+            {config.features.map((feature) => (
+              <li key={feature} className="flex items-center gap-2 text-sm text-text-muted">
                 <span className="font-mono text-accent">+</span>
-                MX heuristic analysis
+                {feature}
               </li>
-            )}
+            ))}
           </ul>
 
           {tier === 'pro' ? (
