@@ -31,6 +31,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
+  // Prevent downgrades via checkout — use billing portal instead
+  const TIER_ORDER: Record<string, number> = { free: 0, starter: 1, pro: 2 };
+  if (TIER_ORDER[tier] <= TIER_ORDER[user.tier]) {
+    return NextResponse.json(
+      { error: 'Use the billing portal to downgrade or manage your subscription' },
+      { status: 400 }
+    );
+  }
+
   // Reuse existing Stripe customer or create one
   let customerId = user.stripeCustomerId;
   if (!customerId) {
