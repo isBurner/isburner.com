@@ -3,10 +3,10 @@ import { headers } from 'next/headers';
 import type { WebhookEvent } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { users, apiKeys } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/keys';
 import { syncKeyToKV, removeKeyFromKV } from '@/lib/kv-sync';
-import { and } from 'drizzle-orm';
+import { stripe } from '@/lib/stripe';
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -96,6 +96,13 @@ export async function POST(req: Request) {
     case 'user.deleted': {
       const { id } = event.data;
       if (id) {
+        const user = await db.query.users.findFirst({ where: eq(users.id, id) });
+
+        // Cancel Stripe subscription before deleting DB records
+        if (user?.stripeSubscriptionId) {
+          await stripe.subscriptions.cancel(user.stripeSubscriptionId).catch(console.error);
+        }
+
         // Remove all active keys from KV before cascade-deleting from DB
         const activeKeys = await db.query.apiKeys.findMany({
           where: and(eq(apiKeys.userId, id), eq(apiKeys.isActive, true)),
