@@ -7,10 +7,11 @@ import { syncUserKeysToKV } from '@/lib/kv-sync';
 import type { Tier } from '@/lib/tier-config';
 import type Stripe from 'stripe';
 
-function tierFromPriceId(priceId: string): Tier {
+function tierFromPriceId(priceId: string): Tier | null {
   if (priceId === process.env.STRIPE_PRO_PRICE_ID) return 'pro';
   if (priceId === process.env.STRIPE_STARTER_PRICE_ID) return 'starter';
-  throw new Error(`Unknown Stripe price ID: ${priceId}`);
+  console.error(`Unknown Stripe price ID: ${priceId} — skipping event`);
+  return null;
 }
 
 /** Extract period timestamps from a subscription's first item. */
@@ -62,6 +63,7 @@ export async function POST(req: Request) {
       const sub = await stripe.subscriptions.retrieve(subscriptionId);
       const period = getSubPeriod(sub);
       const tier = tierFromPriceId(sub.items.data[0].price.id);
+      if (!tier) break;
 
       // Update user tier, subscription ID, and customer ID
       await db
@@ -126,6 +128,7 @@ export async function POST(req: Request) {
 
       const period = getSubPeriod(sub);
       const tier = tierFromPriceId(sub.items.data[0].price.id);
+      if (!tier) break;
 
       // Upsert subscription record (handles both new and updated)
       await db
