@@ -5,6 +5,7 @@ import { users, apiKeys } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/keys';
 import { syncKeyToKV } from '@/lib/kv-sync';
+import { TIER_CONFIG } from '@/lib/tier-config';
 
 /**
  * Ensures the authenticated Clerk user has a corresponding database row.
@@ -55,8 +56,8 @@ export async function ensureUser() {
       userId,
       keyId: inserted.id,
       tier: 'free',
-      rateLimit: 0,
-      monthlyLimit: 0,
+      rateLimit: TIER_CONFIG.free.rateLimit,
+      monthlyLimit: TIER_CONFIG.free.monthlyLimit,
       isActive: true,
     });
   } catch {

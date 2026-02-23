@@ -6,6 +6,7 @@ import { users, apiKeys } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/keys';
 import { syncKeyToKV, removeKeyFromKV } from '@/lib/kv-sync';
+import { TIER_CONFIG } from '@/lib/tier-config';
 import { stripe } from '@/lib/stripe';
 
 export async function POST(req: Request) {
@@ -77,8 +78,8 @@ export async function POST(req: Request) {
           userId: id,
           keyId: inserted.id,
           tier: 'free',
-          rateLimit: 0,
-          monthlyLimit: 0,
+          rateLimit: TIER_CONFIG.free.rateLimit,
+          monthlyLimit: TIER_CONFIG.free.monthlyLimit,
           isActive: true,
         });
       } catch (e) {
