@@ -99,8 +99,9 @@ export async function POST(req: Request) {
           },
         });
 
-      // Sync all active keys to KV with new tier
-      await syncActiveKeys(userId, tier);
+      // Sync all active keys to KV with new tier and billing period
+      const periodStartStr = period.start.toISOString().slice(0, 10);
+      await syncActiveKeys(userId, tier, periodStartStr);
       break;
     }
 
@@ -161,7 +162,8 @@ export async function POST(req: Request) {
           .update(users)
           .set({ tier, stripeSubscriptionId: sub.id, updatedAt: new Date() })
           .where(eq(users.id, userId));
-        await syncActiveKeys(userId, tier);
+        const periodStartStr = period.start.toISOString().slice(0, 10);
+        await syncActiveKeys(userId, tier, periodStartStr);
       } else {
         await downgradeUser(userId);
       }
@@ -226,7 +228,7 @@ async function downgradeUser(userId: string) {
   await syncActiveKeys(userId, 'free');
 }
 
-async function syncActiveKeys(userId: string, tier: Tier) {
+async function syncActiveKeys(userId: string, tier: Tier, billingPeriodStart: string | null = null) {
   const keys = await db.query.apiKeys.findMany({
     where: and(eq(apiKeys.userId, userId), eq(apiKeys.isActive, true)),
   });
@@ -235,7 +237,8 @@ async function syncActiveKeys(userId: string, tier: Tier) {
     await syncUserKeysToKV(
       keys.map((k) => ({ keyHash: k.keyHash, id: k.id })),
       userId,
-      tier
+      tier,
+      billingPeriodStart
     );
   } catch (e) {
     console.error('Failed to sync keys to KV after tier change:', e);

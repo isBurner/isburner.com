@@ -1,31 +1,24 @@
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
-import { users, apiKeys } from '@/lib/db/schema';
+import { apiKeys } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { TIER_CONFIG, type Tier } from '@/lib/tier-config';
-import { getCurrentMonthUsage } from '@/lib/usage';
+import { getCurrentMonthUsage, getBillingPeriodStart } from '@/lib/usage';
+import { ensureUser } from '@/lib/ensure-user';
 import PlanBadge from '@/components/dashboard/PlanBadge';
 import UsageBar from '@/components/dashboard/UsageBar';
 import ApiKeyDisplay from '@/components/dashboard/ApiKeyDisplay';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
-
-  if (!user) redirect('/sign-in');
+  const user = await ensureUser();
 
   const tier = user.tier as Tier;
   const config = TIER_CONFIG[tier];
-  const usage = await getCurrentMonthUsage(userId);
+  const billingPeriodStart = await getBillingPeriodStart(user.id);
+  const usage = await getCurrentMonthUsage(user.id, billingPeriodStart);
 
   const primaryKey = await db.query.apiKeys.findFirst({
-    where: and(eq(apiKeys.userId, userId), eq(apiKeys.isActive, true)),
+    where: and(eq(apiKeys.userId, user.id), eq(apiKeys.isActive, true)),
     orderBy: (apiKeys, { asc }) => [asc(apiKeys.createdAt)],
   });
 

@@ -1,26 +1,17 @@
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
-import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { TIER_CONFIG, type Tier } from '@/lib/tier-config';
-import { getCurrentMonthUsage, getDailyUsage } from '@/lib/usage';
+import { getCurrentMonthUsage, getDailyUsage, getBillingPeriodStart } from '@/lib/usage';
+import { ensureUser } from '@/lib/ensure-user';
 import UsageBar from '@/components/dashboard/UsageBar';
 import UsageChart from '@/components/dashboard/UsageChart';
 
 export default async function UsagePage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
-  if (!user) redirect('/sign-in');
+  const user = await ensureUser();
 
   const tier = user.tier as Tier;
   const config = TIER_CONFIG[tier];
-  const usage = await getCurrentMonthUsage(userId);
-  const dailyUsage = await getDailyUsage(userId, 30);
+  const billingPeriodStart = await getBillingPeriodStart(user.id);
+  const usage = await getCurrentMonthUsage(user.id, billingPeriodStart);
+  const dailyUsage = await getDailyUsage(user.id, 30);
 
   return (
     <div className="mx-auto max-w-3xl">

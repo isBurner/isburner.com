@@ -81,6 +81,7 @@ export async function POST(req: Request) {
           rateLimit: TIER_CONFIG.free.rateLimit,
           monthlyLimit: TIER_CONFIG.free.monthlyLimit,
           isActive: true,
+          billingPeriodStart: null,
         });
       } catch (e) {
         console.error('Failed to sync default key to KV:', e);

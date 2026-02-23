@@ -59,6 +59,7 @@ export async function ensureUser() {
       rateLimit: TIER_CONFIG.free.rateLimit,
       monthlyLimit: TIER_CONFIG.free.monthlyLimit,
       isActive: true,
+      billingPeriodStart: null,
     });
   } catch {
     // Expected to fail in local dev without Cloudflare credentials

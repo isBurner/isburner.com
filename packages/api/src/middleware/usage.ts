@@ -11,8 +11,11 @@ export async function usageMiddleware(c: Context<AppEnv>, next: Next) {
   const keyHash = c.get('keyHash');
 
   const now = new Date();
-  const month = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
-  const usageKey = `usage:${keyHash}:${month}`;
+  // Paid users: reset usage on billing period boundary. Free users: calendar month.
+  const period = apiKey.billingPeriodStart
+    ? apiKey.billingPeriodStart
+    : `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+  const usageKey = `usage:${keyHash}:${period}`;
 
   // Check current usage
   const raw = await c.env.API_KEYS.get(usageKey);

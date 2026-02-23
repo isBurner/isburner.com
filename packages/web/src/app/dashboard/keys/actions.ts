@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { users, apiKeys } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { getBillingPeriodStart } from '@/lib/usage';
 import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/keys';
 import { syncKeyToKV, removeKeyFromKV } from '@/lib/kv-sync';
 import { TIER_CONFIG, type Tier } from '@/lib/tier-config';
@@ -47,6 +48,7 @@ export async function createApiKey(rawName: string): Promise<{ key: string } | {
 
   // Sync to KV
   try {
+    const billingPeriodStart = await getBillingPeriodStart(userId);
     await syncKeyToKV(keyHash, {
       userId,
       keyId: inserted.id,
@@ -54,6 +56,7 @@ export async function createApiKey(rawName: string): Promise<{ key: string } | {
       rateLimit: TIER_CONFIG[user.tier as Tier].rateLimit,
       monthlyLimit: TIER_CONFIG[user.tier as Tier].monthlyLimit,
       isActive: true,
+      billingPeriodStart,
     });
   } catch (e) {
     console.error('Failed to sync new key to KV:', e);

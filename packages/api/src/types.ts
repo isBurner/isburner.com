@@ -10,6 +10,8 @@ export interface ApiKeyData {
   rateLimit: number;
   monthlyLimit: number;
   isActive: boolean;
+  /** ISO date string (YYYY-MM-DD) of Stripe billing period start. Null/undefined for free tier. */
+  billingPeriodStart?: string | null;
 }
 
 export interface AppVariables {

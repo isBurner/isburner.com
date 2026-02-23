@@ -1,16 +1,27 @@
 import { db } from './db';
-import { usageLogs } from './db/schema';
+import { usageLogs, subscriptions } from './db/schema';
 import { eq, and, sql, gte } from 'drizzle-orm';
 
-/** Get total usage for a user in the current billing month. */
-export async function getCurrentMonthUsage(userId: string): Promise<number> {
-  const now = new Date();
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+/** Get total usage for a user in the current billing period.
+ *  Paid users: counts from their Stripe billing period start.
+ *  Free users: counts from the 1st of the current calendar month. */
+export async function getCurrentMonthUsage(
+  userId: string,
+  billingPeriodStart?: string | null
+): Promise<number> {
+  let periodStart: string;
+
+  if (billingPeriodStart) {
+    periodStart = billingPeriodStart;
+  } else {
+    const now = new Date();
+    periodStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  }
 
   const result = await db
     .select({ total: sql<number>`coalesce(sum(${usageLogs.lookupCount}), 0)` })
     .from(usageLogs)
-    .where(and(eq(usageLogs.userId, userId), gte(usageLogs.date, monthStart)));
+    .where(and(eq(usageLogs.userId, userId), gte(usageLogs.date, periodStart)));
 
   return Number(result[0]?.total ?? 0);
 }
@@ -35,4 +46,15 @@ export async function getDailyUsage(
     .orderBy(usageLogs.date);
 
   return rows.map((r) => ({ date: r.date, count: Number(r.count) }));
+}
+
+/** Look up the current billing period start for a user.
+ *  Returns YYYY-MM-DD string for paid users, null for free users. */
+export async function getBillingPeriodStart(userId: string): Promise<string | null> {
+  const sub = await db.query.subscriptions.findFirst({
+    where: and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')),
+  });
+
+  if (!sub?.currentPeriodStart) return null;
+  return sub.currentPeriodStart.toISOString().slice(0, 10);
 }

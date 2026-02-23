@@ -23,6 +23,8 @@ export interface KVKeyData {
   rateLimit: number;
   monthlyLimit: number;
   isActive: boolean;
+  /** ISO date string (YYYY-MM-DD) of Stripe billing period start. Null for free tier. */
+  billingPeriodStart: string | null;
 }
 
 /** Write API key metadata to Cloudflare KV for fast reads at the edge. */
@@ -65,7 +67,8 @@ export async function removeKeyFromKV(keyHash: string): Promise<void> {
 export async function syncUserKeysToKV(
   keys: Array<{ keyHash: string; id: string }>,
   userId: string,
-  tier: Tier
+  tier: Tier,
+  billingPeriodStart: string | null = null
 ): Promise<void> {
   await Promise.all(
     keys.map((key) =>
@@ -76,6 +79,7 @@ export async function syncUserKeysToKV(
         rateLimit: TIER_CONFIG[tier].rateLimit,
         monthlyLimit: TIER_CONFIG[tier].monthlyLimit,
         isActive: true,
+        billingPeriodStart,
       })
     )
   );
