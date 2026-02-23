@@ -46,17 +46,20 @@ export async function POST(req: Request) {
 
       const subscriptionId =
         typeof session.subscription === 'string' ? session.subscription : session.subscription.id;
+      const customerId =
+        typeof session.customer === 'string' ? session.customer : session.customer?.id;
 
       const sub = await stripe.subscriptions.retrieve(subscriptionId);
       const period = getSubPeriod(sub);
       const tier = tierFromPriceId(sub.items.data[0].price.id);
 
-      // Update user tier
+      // Update user tier, subscription ID, and customer ID
       await db
         .update(users)
         .set({
           tier,
           stripeSubscriptionId: subscriptionId,
+          stripeCustomerId: customerId ?? undefined,
           updatedAt: new Date(),
         })
         .where(eq(users.id, userId));
