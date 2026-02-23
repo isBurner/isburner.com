@@ -86,8 +86,8 @@ app.get('/api/check', async (c) => {
     reasons.push('Known disposable domain');
   }
 
-  // 2. MX record heuristic analysis — starter tier only
-  if (!onBlocklist && apiKey.tier === 'starter') {
+  // 2. MX record heuristic analysis — paid tiers only
+  if (!onBlocklist && apiKey.tier !== 'free') {
     const mxResult = await checkMxRecords(domain);
     if (mxResult) {
       score = Math.max(score, 0.9);
