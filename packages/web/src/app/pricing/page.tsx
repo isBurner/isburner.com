@@ -121,7 +121,7 @@ const comparisonRows = [
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-3 font-mono text-xs tracking-widest text-accent uppercase">{children}</h2>
+    <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">{children}</span>
   );
 }
 
@@ -201,9 +201,9 @@ function FeatureComparison() {
       <div className="mx-auto max-w-6xl px-8 py-24 lg:py-32">
         <div className="mb-14 text-center">
           <SectionLabel>Compare plans</SectionLabel>
-          <p className="text-3xl font-bold tracking-tight lg:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Everything you get at every tier
-          </p>
+          </h2>
         </div>
         <div className="mx-auto max-w-2xl overflow-hidden rounded-xl border border-border">
           <table className="w-full text-left text-sm">
@@ -297,9 +297,9 @@ function FAQ() {
       <div className="mx-auto max-w-6xl px-8 py-24 lg:py-32">
         <div className="mb-14 text-center">
           <SectionLabel>FAQ</SectionLabel>
-          <p className="text-3xl font-bold tracking-tight lg:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Frequently asked questions
-          </p>
+          </h2>
         </div>
         <div className="mx-auto max-w-2xl space-y-4">
           {questions.map((item) => (

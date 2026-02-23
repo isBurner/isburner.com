@@ -175,12 +175,12 @@ function HowItWorks() {
     <section id="how" className="relative border-t border-border">
       <div className="mx-auto max-w-6xl px-8 py-24 lg:py-32">
         <div className="mb-14">
-          <h2 className="mb-3 font-mono text-xs tracking-widest text-accent uppercase">
+          <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">
             How it works
-          </h2>
-          <p className="text-3xl font-bold tracking-tight lg:text-4xl">
+          </span>
+          <h2 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Three lines of code. That&apos;s it.
-          </p>
+          </h2>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
@@ -247,12 +247,12 @@ function WhySection() {
     <section className="relative border-t border-border bg-bg-surface/30">
       <div className="mx-auto max-w-6xl px-8 py-24 lg:py-32">
         <div className="mb-14">
-          <h2 className="mb-3 font-mono text-xs tracking-widest text-accent uppercase">
+          <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">
             Why isBurner
-          </h2>
-          <p className="text-3xl font-bold tracking-tight lg:text-4xl">
+          </span>
+          <h2 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Stop burning money on fake signups.
-          </p>
+          </h2>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -306,10 +306,10 @@ function Pricing() {
     <section id="pricing" className="relative border-t border-border">
       <div className="mx-auto max-w-6xl px-8 py-24 lg:py-32">
         <div className="mb-14 text-center">
-          <h2 className="mb-3 font-mono text-xs tracking-widest text-accent uppercase">Pricing</h2>
-          <p className="text-3xl font-bold tracking-tight lg:text-4xl">
+          <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">Pricing</span>
+          <h2 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Start free. Scale when you&apos;re ready.
-          </p>
+          </h2>
           <p className="mt-4 text-text-muted">No credit card required. No surprise bills.</p>
         </div>
 
