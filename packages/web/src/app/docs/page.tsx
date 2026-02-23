@@ -41,8 +41,15 @@ const techArticleSchema = {
     'Complete API reference for the isBurner disposable email detection API. Endpoints, authentication, error handling, and rate limits.',
   url: `${SITE_URL}/docs`,
   author: { '@type': 'Organization', name: 'isBurner' },
-  publisher: { '@type': 'Organization', name: 'isBurner', url: SITE_URL },
-  dateModified: new Date().toISOString(),
+  publisher: {
+    '@type': 'Organization',
+    name: 'isBurner',
+    url: SITE_URL,
+    logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.svg`, width: 512, height: 512 },
+  },
+  datePublished: '2025-02-22',
+  dateModified: '2025-02-22',
+  mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/docs` },
   proficiencyLevel: 'Beginner',
 };
 
