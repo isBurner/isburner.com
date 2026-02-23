@@ -85,7 +85,7 @@ function Hero() {
               <span className="font-mono text-xs text-text-muted">v0.1 — now in beta</span>
             </div>
 
-            <h1 className="boot-in d2 mb-6 font-mono text-5xl leading-[1.08] font-bold tracking-tight lg:text-6xl">
+            <h1 className="boot-in mb-6 font-mono text-5xl leading-[1.08] font-bold tracking-tight lg:text-6xl">
               Is this email
               <br />
               <span className="text-glow text-accent">trash?</span>
