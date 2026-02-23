@@ -7,7 +7,7 @@ import { users, apiKeys } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/keys';
 import { syncKeyToKV, removeKeyFromKV } from '@/lib/kv-sync';
-import type { Tier } from '@/lib/tier-config';
+import { TIER_CONFIG, type Tier } from '@/lib/tier-config';
 
 const MAX_KEYS_PER_USER = 5;
 
@@ -49,8 +49,8 @@ export async function createApiKey(name: string): Promise<{ key: string } | { er
       userId,
       keyId: inserted.id,
       tier: user.tier as Tier,
-      rateLimit: 0, // filled by syncKeyToKV from tier config
-      monthlyLimit: 0,
+      rateLimit: TIER_CONFIG[user.tier as Tier].rateLimit,
+      monthlyLimit: TIER_CONFIG[user.tier as Tier].monthlyLimit,
       isActive: true,
     });
   } catch (e) {
