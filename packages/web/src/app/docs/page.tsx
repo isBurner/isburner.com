@@ -109,7 +109,7 @@ function CheckEndpoint() {
 
         {/* Query Parameters */}
         <h3 className="mb-4 text-lg font-semibold">Query parameters</h3>
-        <div className="mb-10 overflow-hidden rounded-xl border border-border">
+        <div className="mb-10 overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-surface/60">
@@ -148,7 +148,7 @@ function CheckEndpoint() {
 
         {/* Response Schema */}
         <h3 className="mb-4 text-lg font-semibold">Response</h3>
-        <div className="mb-6 overflow-hidden rounded-xl border border-border">
+        <div className="mb-6 overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-surface/60">
@@ -224,7 +224,7 @@ function CheckEndpoint() {
 
         {/* Error Responses */}
         <h3 className="mb-4 text-lg font-semibold">Error responses</h3>
-        <div className="overflow-hidden rounded-xl border border-border">
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-surface/60">
@@ -324,7 +324,7 @@ function RateLimits() {
           the limit returns a <code className="rounded bg-bg-surface px-2 py-0.5 text-sm text-warning">429</code>{' '}
           status code.
         </p>
-        <div className="overflow-hidden rounded-xl border border-border">
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-surface/60">

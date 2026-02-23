@@ -205,7 +205,7 @@ function FeatureComparison() {
             Everything you get at every tier
           </h2>
         </div>
-        <div className="mx-auto max-w-2xl overflow-hidden rounded-xl border border-border">
+        <div className="mx-auto max-w-2xl overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-surface/60">
