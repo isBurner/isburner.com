@@ -93,9 +93,9 @@ function AuthSection() {
         <SectionLabel>Authentication</SectionLabel>
         <h2 className="mb-6 text-2xl font-bold tracking-tight">API Keys</h2>
         <p className="mb-6 max-w-2xl leading-relaxed text-text-muted">
-          Free tier requires no authentication. For paid plans, pass your API key via the{' '}
+          All requests require an API key. Pass it via the{' '}
           <code className="rounded bg-bg-surface px-2 py-0.5 text-sm text-accent">X-API-Key</code>{' '}
-          header.
+          header. Get a free key by creating an account — no credit card required.
         </p>
         <CodeBlock
           title="Authenticated request"
@@ -336,7 +336,7 @@ function RateLimits() {
         <SectionLabel>Limits</SectionLabel>
         <h2 className="mb-6 text-2xl font-bold tracking-tight">Rate Limits</h2>
         <p className="mb-8 max-w-2xl leading-relaxed text-text-muted">
-          Rate limits are applied per API key (or per IP for unauthenticated requests). Exceeding
+          Rate limits are applied per API key. Exceeding
           the limit returns a <code className="rounded bg-bg-surface px-2 py-0.5 text-sm text-warning">429</code>{' '}
           status code.
         </p>

@@ -116,7 +116,7 @@ const comparisonRows = [
   { feature: 'MX heuristic analysis', free: false, starter: true },
   { feature: 'Usage dashboard', free: false, starter: true },
   { feature: 'Email support', free: true, starter: true },
-  { feature: 'API key required', free: false, starter: true },
+  { feature: 'API key required', free: true, starter: true },
 ];
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -260,7 +260,7 @@ function FAQ() {
   const questions = [
     {
       q: 'Is there a free disposable email detection API?',
-      a: 'Yes. isBurner offers a free tier with 1,000 lookups per month, 10 requests per second, and access to our 30,000+ domain blocklist. No API key or credit card required — just send a GET request and start blocking burner emails.',
+      a: 'Yes. isBurner offers a free tier with 1,000 lookups per month, 10 requests per second, and access to our 30,000+ domain blocklist. No credit card required — create an account, grab your API key, and start blocking burner emails.',
     },
     {
       q: 'How much does an email validation API cost?',
@@ -275,8 +275,8 @@ function FAQ() {
       a: 'Requests beyond your monthly limit return a 429 (Too Many Requests) status code. Your service won\u2019t break — you just won\u2019t get results until the next billing cycle. You can upgrade to a higher plan at any time and the new limit takes effect immediately.',
     },
     {
-      q: 'Can I detect burner emails without an API key?',
-      a: 'Yes. The free tier requires no authentication — just send a GET request to the /api/check endpoint with an email parameter. Paid plans use an X-API-Key header for higher rate limits and access to MX heuristic analysis.',
+      q: 'Do I need an API key?',
+      a: 'Yes. All plans require a free API key, which you get when you create an account. Just pass it via the X-API-Key header. Signup takes under a minute — no credit card needed for the free tier.',
     },
     {
       q: 'How does isBurner compare to Kickbox or ZeroBounce?',
