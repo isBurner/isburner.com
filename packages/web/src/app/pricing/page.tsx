@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import JsonLd from '@/components/JsonLd';
@@ -9,7 +10,7 @@ const SITE_URL = 'https://isburner.com';
 export const metadata: Metadata = {
   title: 'Pricing — Disposable Email Detection API',
   description:
-    'Free tier with 1,000 lookups/mo. Paid plans from $5/mo. No credit card required. Compare isBurner plans for disposable email detection.',
+    'Free tier with 1,000 lookups/mo. Paid plans from $5/mo. Pro at $19/mo for 100K lookups. No credit card required. Compare isBurner plans.',
   keywords: [
     'disposable email API pricing',
     'email validation API cost',
@@ -21,14 +22,12 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Pricing — Disposable Email Detection API | isBurner',
-    description:
-      'Free tier with 1,000 lookups/mo. Paid plans from $5/mo. No credit card required.',
+    description: 'Free tier with 1,000 lookups/mo. Paid plans from $5/mo. No credit card required.',
     url: `${SITE_URL}/pricing`,
   },
   twitter: {
     title: 'Pricing — Disposable Email Detection API | isBurner',
-    description:
-      'Free tier with 1,000 lookups/mo. Paid plans from $5/mo. No credit card required.',
+    description: 'Free tier with 1,000 lookups/mo. Paid plans from $5/mo. No credit card required.',
   },
   alternates: {
     canonical: `${SITE_URL}/pricing`,
@@ -50,7 +49,7 @@ const productSchema = {
       name: 'Free',
       price: '0',
       priceCurrency: 'USD',
-      description: '1,000 lookups/mo, 10 req/sec, blocklist detection, email support',
+      description: '1,000 lookups/mo, 10 req/sec, blocklist detection, community support',
       availability: 'https://schema.org/InStock',
       url: `${SITE_URL}/pricing`,
     },
@@ -59,12 +58,28 @@ const productSchema = {
       name: 'Starter',
       price: '5.00',
       priceCurrency: 'USD',
-      description: '25,000 lookups/mo, 50 req/sec, MX heuristic analysis, usage dashboard',
+      description: '10,000 lookups/mo, 50 req/sec, MX heuristic analysis, usage dashboard',
       availability: 'https://schema.org/InStock',
       url: `${SITE_URL}/pricing`,
       priceSpecification: {
         '@type': 'UnitPriceSpecification',
         price: '5.00',
+        priceCurrency: 'USD',
+        billingDuration: 'P1M',
+        unitText: 'MONTH',
+      },
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro',
+      price: '19.00',
+      priceCurrency: 'USD',
+      description: '100,000 lookups/mo, 100 req/sec, MX heuristic analysis, priority support',
+      availability: 'https://schema.org/InStock',
+      url: `${SITE_URL}/pricing`,
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: '19.00',
         priceCurrency: 'USD',
         billingDuration: 'P1M',
         unitText: 'MONTH',
@@ -88,7 +103,7 @@ const plans = [
     price: '$0',
     period: 'forever',
     description: 'For side projects and testing.',
-    features: ['1,000 lookups/mo', '10 req/sec', 'Community domain list', 'Email support'],
+    features: ['1,000 lookups/mo', '10 req/sec', 'Community domain list', 'Community support'],
     cta: 'Start free',
     highlighted: false,
   },
@@ -96,32 +111,50 @@ const plans = [
     name: 'Starter',
     price: '$5',
     period: '/mo',
-    description: 'For production apps that need more.',
+    description: 'For growing apps.',
     features: [
-      '25,000 lookups/mo',
+      '10,000 lookups/mo',
       '50 req/sec',
       'MX heuristic analysis',
       'Usage dashboard',
       'Email support',
     ],
     cta: 'Get started',
+    highlighted: false,
+  },
+  {
+    name: 'Pro',
+    price: '$19',
+    period: '/mo',
+    description: 'For production at scale.',
+    features: [
+      '100,000 lookups/mo',
+      '100 req/sec',
+      'MX heuristic analysis',
+      'Usage dashboard',
+      'Priority support',
+    ],
+    cta: 'Go Pro',
     highlighted: true,
   },
 ];
 
 const comparisonRows = [
-  { feature: 'Monthly lookups', free: '1,000', starter: '25,000' },
-  { feature: 'Rate limit', free: '10 req/sec', starter: '50 req/sec' },
-  { feature: 'Blocklist detection', free: true, starter: true },
-  { feature: 'MX heuristic analysis', free: false, starter: true },
-  { feature: 'Usage dashboard', free: false, starter: true },
-  { feature: 'Email support', free: true, starter: true },
-  { feature: 'API key required', free: true, starter: true },
+  { feature: 'Monthly lookups', free: '1,000', starter: '10,000', pro: '100,000' },
+  { feature: 'Rate limit', free: '10 req/sec', starter: '50 req/sec', pro: '100 req/sec' },
+  { feature: 'Blocklist detection', free: true, starter: true, pro: true },
+  { feature: 'API key required', free: true, starter: true, pro: true },
+  { feature: 'MX heuristic analysis', free: false, starter: true, pro: true },
+  { feature: 'Usage dashboard', free: false, starter: true, pro: true },
+  { feature: 'Email support', free: false, starter: true, pro: true },
+  { feature: 'Priority support', free: false, starter: false, pro: true },
 ];
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">{children}</span>
+    <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">
+      {children}
+    </span>
   );
 }
 
@@ -146,7 +179,7 @@ function PricingCards() {
   return (
     <section className="border-t border-border">
       <div className="mx-auto max-w-6xl px-8 py-24 lg:py-32">
-        <div className="mx-auto grid max-w-2xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -177,8 +210,8 @@ function PricingCards() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="#"
+              <Link
+                href="/sign-up"
                 className={`block rounded-xl py-3 text-center font-mono text-sm transition-all ${
                   plan.highlighted
                     ? 'bg-accent font-semibold text-bg hover:bg-accent-dim'
@@ -186,7 +219,7 @@ function PricingCards() {
                 }`}
               >
                 {plan.cta}
-              </a>
+              </Link>
             </div>
           ))}
         </div>
@@ -205,18 +238,19 @@ function FeatureComparison() {
             Everything you get at every tier
           </h2>
         </div>
-        <div className="mx-auto max-w-2xl overflow-x-auto rounded-xl border border-border">
+        <div className="mx-auto max-w-3xl overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-bg-surface/60">
-                <th className="px-5 py-3 font-mono text-xs font-medium text-text-faint">
-                  Feature
-                </th>
+                <th className="px-5 py-3 font-mono text-xs font-medium text-text-faint">Feature</th>
                 <th className="px-5 py-3 text-center font-mono text-xs font-medium text-text-faint">
                   Free
                 </th>
-                <th className="px-5 py-3 text-center font-mono text-xs font-medium text-accent">
+                <th className="px-5 py-3 text-center font-mono text-xs font-medium text-text-faint">
                   Starter
+                </th>
+                <th className="px-5 py-3 text-center font-mono text-xs font-medium text-accent">
+                  Pro
                 </th>
               </tr>
             </thead>
@@ -224,28 +258,19 @@ function FeatureComparison() {
               {comparisonRows.map((row) => (
                 <tr key={row.feature}>
                   <td className="px-5 py-3 text-text-muted">{row.feature}</td>
-                  <td className="px-5 py-3 text-center font-mono text-text-muted">
-                    {typeof row.free === 'boolean' ? (
-                      row.free ? (
-                        <span className="text-accent">&#x2713;</span>
+                  {(['free', 'starter', 'pro'] as const).map((tier) => (
+                    <td key={tier} className="px-5 py-3 text-center font-mono text-text-muted">
+                      {typeof row[tier] === 'boolean' ? (
+                        row[tier] ? (
+                          <span className="text-accent">&#x2713;</span>
+                        ) : (
+                          <span className="text-text-faint">&#x2014;</span>
+                        )
                       ) : (
-                        <span className="text-text-faint">&#x2014;</span>
-                      )
-                    ) : (
-                      row.free
-                    )}
-                  </td>
-                  <td className="px-5 py-3 text-center font-mono text-text-muted">
-                    {typeof row.starter === 'boolean' ? (
-                      row.starter ? (
-                        <span className="text-accent">&#x2713;</span>
-                      ) : (
-                        <span className="text-text-faint">&#x2014;</span>
-                      )
-                    ) : (
-                      row.starter
-                    )}
-                  </td>
+                        row[tier]
+                      )}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -260,11 +285,11 @@ function FAQ() {
   const questions = [
     {
       q: 'Is there a free disposable email detection API?',
-      a: 'Yes. isBurner offers a free tier with 1,000 lookups per month, 10 requests per second, and access to our 30,000+ domain blocklist. No credit card required — create an account, grab your API key, and start blocking burner emails.',
+      a: 'Yes. isBurner offers a free tier with 1,000 lookups per month, 10 requests per second, and access to our 30,000+ domain blocklist. No credit card required — create an account, grab your API key, and start blocking burner emails. Free tier includes community support via GitHub.',
     },
     {
       q: 'How much does an email validation API cost?',
-      a: 'isBurner starts at $0 (free forever). The Starter plan is $5/mo for 25,000 lookups and includes MX heuristic analysis to catch disposable services that static blocklists miss. Competitors like Kickbox, ZeroBounce, and NeverBounce charge $17–99/mo for the same check bundled into suites you don\u2019t need.',
+      a: 'isBurner starts at $0 (free forever). The Starter plan is $5/mo for 10,000 lookups and Pro is $19/mo for 100,000 lookups — both include MX heuristic analysis to catch disposable services that static blocklists miss. Competitors like Kickbox, ZeroBounce, and NeverBounce charge $17–99/mo for the same check bundled into suites you don\u2019t need.',
     },
     {
       q: 'Do I need a credit card to start?',
@@ -284,7 +309,7 @@ function FAQ() {
     },
     {
       q: 'Is there a pay-as-you-go option?',
-      a: 'Not yet. We currently offer fixed monthly plans (Free and Starter). If you need custom volume pricing for high-traffic applications, reach out and we\u2019ll work out a plan that fits.',
+      a: 'Not yet. We currently offer fixed monthly plans (Free, Starter, and Pro). If you need custom volume pricing beyond 100,000 lookups/mo, reach out and we\u2019ll work out a plan that fits.',
     },
     {
       q: 'Can I switch plans or cancel anytime?',
@@ -325,12 +350,12 @@ function CTASection() {
         <p className="mb-10 text-lg text-text-muted">
           1,000 free lookups every month. Block disposable emails in under 5 minutes.
         </p>
-        <a
-          href="#"
+        <Link
+          href="/sign-up"
           className="glow-accent inline-block rounded-xl bg-accent px-8 py-4 font-mono text-sm font-semibold text-bg transition-all hover:bg-accent-dim"
         >
           Get your free API key
-        </a>
+        </Link>
       </div>
     </section>
   );

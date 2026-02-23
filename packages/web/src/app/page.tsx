@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import TerminalDemo from '@/components/TerminalDemo';
 import JsonLd from '@/components/JsonLd';
 import Nav from '@/components/Nav';
@@ -48,12 +49,28 @@ const productSchema = {
       name: 'Starter',
       price: '5.00',
       priceCurrency: 'USD',
-      description: '25,000 lookups/mo, 50 req/sec, MX heuristic analysis',
+      description: '10,000 lookups/mo, 50 req/sec, MX heuristic analysis',
       availability: 'https://schema.org/InStock',
       url: `${SITE_URL}/pricing`,
       priceSpecification: {
         '@type': 'UnitPriceSpecification',
         price: '5.00',
+        priceCurrency: 'USD',
+        billingDuration: 'P1M',
+        unitText: 'MONTH',
+      },
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro',
+      price: '19.00',
+      priceCurrency: 'USD',
+      description: '100,000 lookups/mo, 100 req/sec, MX heuristic analysis, usage dashboard',
+      availability: 'https://schema.org/InStock',
+      url: `${SITE_URL}/pricing`,
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: '19.00',
         priceCurrency: 'USD',
         billingDuration: 'P1M',
         unitText: 'MONTH',
@@ -97,12 +114,12 @@ function Hero() {
             </p>
 
             <div className="boot-in d4 flex flex-wrap items-center gap-4">
-              <a
-                href="#"
+              <Link
+                href="/sign-up"
                 className="glow-accent rounded-lg bg-accent px-6 py-3 font-mono text-sm font-semibold text-bg transition-all hover:bg-accent-dim"
               >
                 Get free API key
-              </a>
+              </Link>
               <a
                 href="#how"
                 className="rounded-lg border border-border-bright px-6 py-3 font-mono text-sm text-text-muted transition-all hover:border-accent/40 hover:text-text"
@@ -281,7 +298,7 @@ function Pricing() {
       price: '$0',
       period: 'forever',
       description: 'For side projects and testing.',
-      features: ['1,000 lookups/mo', '10 req/sec', 'Community domain list', 'Email support'],
+      features: ['1,000 lookups/mo', '10 req/sec', 'Community domain list', 'Community support'],
       cta: 'Start free',
       highlighted: false,
     },
@@ -289,15 +306,30 @@ function Pricing() {
       name: 'Starter',
       price: '$5',
       period: '/mo',
-      description: 'For production apps that need more.',
+      description: 'For growing apps.',
       features: [
-        '25,000 lookups/mo',
+        '10,000 lookups/mo',
         '50 req/sec',
         'MX heuristic analysis',
         'Usage dashboard',
         'Email support',
       ],
       cta: 'Get started',
+      highlighted: false,
+    },
+    {
+      name: 'Pro',
+      price: '$19',
+      period: '/mo',
+      description: 'For production at scale.',
+      features: [
+        '100,000 lookups/mo',
+        '100 req/sec',
+        'MX heuristic analysis',
+        'Usage dashboard',
+        'Priority support',
+      ],
+      cta: 'Go Pro',
       highlighted: true,
     },
   ];
@@ -306,14 +338,16 @@ function Pricing() {
     <section id="pricing" className="relative border-t border-border">
       <div className="mx-auto max-w-6xl px-8 py-24 lg:py-32">
         <div className="mb-14 text-center">
-          <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">Pricing</span>
+          <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">
+            Pricing
+          </span>
           <h2 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Start free. Scale when you&apos;re ready.
           </h2>
           <p className="mt-4 text-text-muted">No credit card required. No surprise bills.</p>
         </div>
 
-        <div className="mx-auto grid max-w-2xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -344,8 +378,8 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="#"
+              <Link
+                href="/sign-up"
                 className={`block rounded-xl py-3 text-center font-mono text-sm transition-all ${
                   plan.highlighted
                     ? 'bg-accent font-semibold text-bg hover:bg-accent-dim'
@@ -353,7 +387,7 @@ function Pricing() {
                 }`}
               >
                 {plan.cta}
-              </a>
+              </Link>
             </div>
           ))}
         </div>
@@ -382,12 +416,12 @@ function CTASection() {
         <p className="mb-10 text-lg text-text-muted">
           Free tier. No credit card. Start blocking disposable emails in under 5 minutes.
         </p>
-        <a
-          href="#"
+        <Link
+          href="/sign-up"
           className="glow-accent inline-block rounded-xl bg-accent px-8 py-4 font-mono text-sm font-semibold text-bg transition-all hover:bg-accent-dim"
         >
           Get your free API key
-        </a>
+        </Link>
         <div className="mt-6 font-mono text-xs text-text-faint">
           1,000 free lookups/mo — no strings attached
         </div>

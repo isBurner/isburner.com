@@ -19,9 +19,6 @@ export default function Footer() {
           >
             Docs
           </Link>
-          <a href="#" className="text-xs text-text-faint transition-colors hover:text-text-muted">
-            Status
-          </a>
           <a
             href="https://github.com/isBurner"
             className="text-xs text-text-faint transition-colors hover:text-text-muted"
@@ -30,9 +27,18 @@ export default function Footer() {
           >
             GitHub
           </a>
-          <a href="#" className="text-xs text-text-faint transition-colors hover:text-text-muted">
+          <Link
+            href="/terms"
+            className="text-xs text-text-faint transition-colors hover:text-text-muted"
+          >
             Terms
-          </a>
+          </Link>
+          <Link
+            href="/privacy"
+            className="text-xs text-text-faint transition-colors hover:text-text-muted"
+          >
+            Privacy
+          </Link>
         </div>
       </div>
     </footer>

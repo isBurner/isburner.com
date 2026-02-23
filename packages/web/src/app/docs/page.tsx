@@ -64,7 +64,9 @@ const breadcrumbSchema = {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">{children}</span>
+    <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">
+      {children}
+    </span>
   );
 }
 
@@ -145,8 +147,8 @@ function CheckEndpoint() {
                 <td className="px-5 py-3 font-mono text-text-muted">string</td>
                 <td className="px-5 py-3 font-mono text-accent">Yes</td>
                 <td className="px-5 py-3 text-text-muted">
-                  The email address to check (e.g. <code className="text-text">user@example.com</code>
-                  )
+                  The email address to check (e.g.{' '}
+                  <code className="text-text">user@example.com</code>)
                 </td>
               </tr>
             </tbody>
@@ -158,7 +160,8 @@ function CheckEndpoint() {
         <div className="mb-10">
           <CodeBlock
             title="cURL"
-            code={`curl "${API_BASE}/api/check?email=user@tempmail.com"`}
+            code={`curl -H "X-API-Key: your_api_key" \\
+  "${API_BASE}/api/check?email=user@tempmail.com"`}
           />
         </div>
 
@@ -267,6 +270,24 @@ function CheckEndpoint() {
                 <td className="px-5 py-3 text-text-muted">Value is not a valid email address</td>
               </tr>
               <tr>
+                <td className="px-5 py-3 font-mono text-error">401</td>
+                <td className="px-5 py-3 font-mono text-text-muted">
+                  {`{ "error": "Missing API key..." }`}
+                </td>
+                <td className="px-5 py-3 text-text-muted">
+                  <code className="text-text">X-API-Key</code> header not provided or invalid
+                </td>
+              </tr>
+              <tr>
+                <td className="px-5 py-3 font-mono text-warning">429</td>
+                <td className="px-5 py-3 font-mono text-text-muted">
+                  {`{ "error": "Rate limit exceeded." }`}
+                </td>
+                <td className="px-5 py-3 text-text-muted">
+                  Per-second rate limit or monthly usage limit exceeded
+                </td>
+              </tr>
+              <tr>
                 <td className="px-5 py-3 font-mono text-error">500</td>
                 <td className="px-5 py-3 font-mono text-text-muted">
                   {`{ "error": "Internal server error" }`}
@@ -336,9 +357,9 @@ function RateLimits() {
         <SectionLabel>Limits</SectionLabel>
         <h2 className="mb-6 text-2xl font-bold tracking-tight">Rate Limits</h2>
         <p className="mb-8 max-w-2xl leading-relaxed text-text-muted">
-          Rate limits are applied per API key. Exceeding
-          the limit returns a <code className="rounded bg-bg-surface px-2 py-0.5 text-sm text-warning">429</code>{' '}
-          status code.
+          Rate limits are applied per API key. Exceeding the limit returns a{' '}
+          <code className="rounded bg-bg-surface px-2 py-0.5 text-sm text-warning">429</code> status
+          code.
         </p>
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
@@ -366,10 +387,17 @@ function RateLimits() {
                 <td className="px-5 py-3 text-text-faint">&#x2014;</td>
               </tr>
               <tr>
-                <td className="px-5 py-3 font-mono font-medium text-accent">Starter</td>
+                <td className="px-5 py-3 font-mono font-medium text-text">Starter</td>
                 <td className="px-5 py-3 text-text-muted">$5/mo</td>
-                <td className="px-5 py-3 text-text-muted">25,000</td>
+                <td className="px-5 py-3 text-text-muted">10,000</td>
                 <td className="px-5 py-3 text-text-muted">50 req/sec</td>
+                <td className="px-5 py-3 text-accent">&#x2713;</td>
+              </tr>
+              <tr>
+                <td className="px-5 py-3 font-mono font-medium text-accent">Pro</td>
+                <td className="px-5 py-3 text-text-muted">$19/mo</td>
+                <td className="px-5 py-3 text-text-muted">100,000</td>
+                <td className="px-5 py-3 text-text-muted">100 req/sec</td>
                 <td className="px-5 py-3 text-accent">&#x2713;</td>
               </tr>
             </tbody>

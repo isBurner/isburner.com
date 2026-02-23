@@ -1,24 +1,24 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import type { AppEnv } from './types';
+import { authMiddleware } from './middleware/auth';
+import { rateLimitMiddleware } from './middleware/rate-limit';
+import { usageMiddleware } from './middleware/usage';
+import internal from './routes/internal';
 import { DISPOSABLE_DOMAINS } from './data/domains';
 import { DISPOSABLE_MX_HOSTS, DISPOSABLE_MX_PATTERNS } from './data/mx-patterns';
 import { checkMxRecords } from './mx';
 
-type Bindings = {
-  // KV namespace for dynamic overrides (added later)
-  // DOMAINS_KV: KVNamespace;
-};
+const app = new Hono<AppEnv>();
 
-const app = new Hono<{ Bindings: Bindings }>();
-
-// CORS — allow any origin for now (public API), lock down later with API keys
+// CORS — allow any origin (public API)
 app.use(
   '*',
   cors({
     origin: '*',
     allowMethods: ['GET', 'OPTIONS'],
     maxAge: 86400,
-  }),
+  })
 );
 
 // Consistent error format
@@ -31,7 +31,7 @@ app.notFound((c) => {
   return c.json({ error: 'Not found', docs: 'https://isburner.com/docs' }, 404);
 });
 
-// Root — API info
+// Public routes (no auth required)
 app.get('/', (c) => {
   return c.json({
     name: 'isBurner API',
@@ -39,6 +39,21 @@ app.get('/', (c) => {
     docs: 'https://isburner.com/docs',
   });
 });
+
+app.get('/health', (c) => {
+  return c.json({
+    status: 'ok',
+    domains_loaded: DISPOSABLE_DOMAINS.size,
+    mx_hosts_loaded: DISPOSABLE_MX_HOSTS.size,
+    mx_patterns_loaded: DISPOSABLE_MX_PATTERNS.length,
+  });
+});
+
+// Internal routes (protected by shared secret)
+app.route('/internal', internal);
+
+// Auth + rate limiting + usage tracking for /api/* routes
+app.use('/api/*', authMiddleware, rateLimitMiddleware, usageMiddleware);
 
 // Main endpoint — check if an email is disposable
 app.get('/api/check', async (c) => {
@@ -60,6 +75,7 @@ app.get('/api/check', async (c) => {
     return c.json({ error: 'Invalid email domain' }, 400);
   }
 
+  const apiKey = c.get('apiKey');
   const reasons: string[] = [];
   let score = 0;
 
@@ -70,8 +86,8 @@ app.get('/api/check', async (c) => {
     reasons.push('Known disposable domain');
   }
 
-  // 2. MX record heuristic analysis (~20ms, skip if already confirmed disposable)
-  if (!onBlocklist) {
+  // 2. MX record heuristic analysis — starter tier only
+  if (!onBlocklist && apiKey.tier === 'starter') {
     const mxResult = await checkMxRecords(domain);
     if (mxResult) {
       score = Math.max(score, 0.9);
@@ -85,16 +101,6 @@ app.get('/api/check', async (c) => {
     disposable: score > 0.5,
     score,
     reasons,
-  });
-});
-
-// Health check
-app.get('/health', (c) => {
-  return c.json({
-    status: 'ok',
-    domains_loaded: DISPOSABLE_DOMAINS.size,
-    mx_hosts_loaded: DISPOSABLE_MX_HOSTS.size,
-    mx_patterns_loaded: DISPOSABLE_MX_PATTERNS.length,
   });
 });
 

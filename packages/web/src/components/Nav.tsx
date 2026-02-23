@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -35,12 +36,37 @@ export default function Nav() {
           >
             GitHub
           </a>
-          <a
-            href="#"
-            className="hidden rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 font-mono text-xs text-accent transition-all hover:border-accent/60 hover:bg-accent/10 sm:block"
-          >
-            Get API Key
-          </a>
+
+          <SignedOut>
+            <Link
+              href="/sign-up"
+              className="hidden rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 font-mono text-xs text-accent transition-all hover:border-accent/60 hover:bg-accent/10 sm:block"
+            >
+              Get API Key
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <Link
+              href="/dashboard"
+              className="hidden rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 font-mono text-xs text-accent transition-all hover:border-accent/60 hover:bg-accent/10 sm:block"
+            >
+              Dashboard
+            </Link>
+            <div className="hidden sm:block">
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: 'h-7 w-7',
+                    userButtonPopoverCard: 'border-[#1e1e2a] bg-[#0e0e14]',
+                    userButtonPopoverActionButton: 'text-[#e2e2ea] hover:bg-[#14141c]',
+                    userButtonPopoverActionButtonText: 'text-[#e2e2ea]',
+                    userButtonPopoverFooter: 'hidden',
+                  },
+                }}
+              />
+            </div>
+          </SignedIn>
+
           <button
             onClick={toggle}
             aria-label="Toggle menu"
@@ -78,12 +104,25 @@ export default function Nav() {
             >
               GitHub
             </a>
-            <a
-              href="#"
-              className="mt-2 rounded-lg border border-accent/30 bg-accent/5 px-4 py-2.5 text-center font-mono text-sm text-accent transition-all hover:border-accent/60 hover:bg-accent/10"
-            >
-              Get API Key
-            </a>
+
+            <SignedOut>
+              <Link
+                href="/sign-up"
+                onClick={close}
+                className="mt-2 rounded-lg border border-accent/30 bg-accent/5 px-4 py-2.5 text-center font-mono text-sm text-accent transition-all hover:border-accent/60 hover:bg-accent/10"
+              >
+                Get API Key
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link
+                href="/dashboard"
+                onClick={close}
+                className="mt-2 rounded-lg border border-accent/30 bg-accent/5 px-4 py-2.5 text-center font-mono text-sm text-accent transition-all hover:border-accent/60 hover:bg-accent/10"
+              >
+                Dashboard
+              </Link>
+            </SignedIn>
           </div>
         </div>
       )}

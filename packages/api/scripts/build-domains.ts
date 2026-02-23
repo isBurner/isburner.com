@@ -139,11 +139,20 @@ export const DISPOSABLE_DOMAINS: ReadonlySet<string> = new Set(DOMAINS_LIST);
 `;
 
   const fs = await import('node:fs');
+  const path = await import('node:path');
   const { fileURLToPath } = await import('node:url');
   const filePath = fileURLToPath(new URL('../src/data/domains.ts', import.meta.url));
   fs.writeFileSync(filePath, source, 'utf-8');
 
   console.log(`Written to src/data/domains.ts (${sorted.length} domains)`);
+
+  // Also output JSON for the web package (used by domain lookup pages + sitemap)
+  const webJsonPath = path.resolve(
+    fileURLToPath(new URL('../..', import.meta.url)),
+    'web/src/data/domains.json',
+  );
+  fs.writeFileSync(webJsonPath, JSON.stringify(sorted), 'utf-8');
+  console.log(`Written to packages/web/src/data/domains.json (${sorted.length} domains)`);
 
   // Quick stats
   const tlds = new Map<string, number>();

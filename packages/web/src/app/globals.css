@@ -118,11 +118,21 @@
     animation: bootIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
-  .d1 { animation-delay: 0.05s; }
-  .d2 { animation-delay: 0.12s; }
-  .d3 { animation-delay: 0.2s; }
-  .d4 { animation-delay: 0.3s; }
-  .d5 { animation-delay: 0.42s; }
+  .d1 {
+    animation-delay: 0.05s;
+  }
+  .d2 {
+    animation-delay: 0.12s;
+  }
+  .d3 {
+    animation-delay: 0.2s;
+  }
+  .d4 {
+    animation-delay: 0.3s;
+  }
+  .d5 {
+    animation-delay: 0.42s;
+  }
 
   .terminal-enter {
     animation: terminalDrop 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
