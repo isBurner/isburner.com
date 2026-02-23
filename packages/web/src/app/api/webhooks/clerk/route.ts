@@ -48,8 +48,15 @@ export async function POST(req: Request) {
       );
       const email = primaryEmail?.email_address ?? email_addresses[0]?.email_address ?? '';
 
-      // Create user row
-      await db.insert(users).values({ id, email });
+      // Create user row (no-op if ensureUser already created it)
+      const [newUser] = await db
+        .insert(users)
+        .values({ id, email })
+        .onConflictDoNothing()
+        .returning();
+
+      // If insert was a no-op, ensureUser already created the user + default key
+      if (!newUser) break;
 
       // Generate default API key
       const rawKey = generateApiKey();
