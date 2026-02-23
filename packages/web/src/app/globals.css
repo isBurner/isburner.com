@@ -132,6 +132,21 @@
     animation: hudSlide 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  /* ---- Collapsible section (grid-row trick) ---- */
+  .details-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease-out;
+  }
+
+  details[open] .details-content {
+    grid-template-rows: 1fr;
+  }
+
+  .details-content > div {
+    overflow: hidden;
+  }
+
   /* ---- Scan line (very subtle) ---- */
   .scanline::after {
     content: '';
