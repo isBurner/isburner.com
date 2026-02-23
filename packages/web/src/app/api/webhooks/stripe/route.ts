@@ -96,11 +96,19 @@ export async function POST(req: Request) {
       const sub = event.data.object;
       let userId = await getUserIdFromSubscription(sub.id);
 
-      // If this subscription isn't in our DB yet (price swap on existing sub),
-      // look up the user by their stripeSubscriptionId on the users table
+      // Fallback: look up by stripeSubscriptionId on users table
       if (!userId) {
         const user = await db.query.users.findFirst({
           where: eq(users.stripeSubscriptionId, sub.id),
+        });
+        userId = user?.id ?? null;
+      }
+
+      // Fallback: look up by Stripe customer ID (handles out-of-order events)
+      if (!userId) {
+        const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
+        const user = await db.query.users.findFirst({
+          where: eq(users.stripeCustomerId, customerId),
         });
         userId = user?.id ?? null;
       }
