@@ -41,8 +41,18 @@ export async function POST(req: Request) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object;
-      const userId = session.metadata?.userId;
-      if (!userId || !session.subscription) break;
+      if (!session.subscription) break;
+
+      let userId = session.metadata?.userId;
+      if (!userId && session.customer) {
+        const customerId =
+          typeof session.customer === 'string' ? session.customer : session.customer.id;
+        const user = await db.query.users.findFirst({
+          where: eq(users.stripeCustomerId, customerId),
+        });
+        userId = user?.id;
+      }
+      if (!userId) break;
 
       const subscriptionId =
         typeof session.subscription === 'string' ? session.subscription : session.subscription.id;
@@ -157,7 +167,21 @@ export async function POST(req: Request) {
 
     case 'customer.subscription.deleted': {
       const sub = event.data.object;
-      const userId = await getUserIdFromSubscription(sub.id);
+      let userId = await getUserIdFromSubscription(sub.id);
+
+      if (!userId) {
+        const user = await db.query.users.findFirst({
+          where: eq(users.stripeSubscriptionId, sub.id),
+        });
+        userId = user?.id ?? null;
+      }
+      if (!userId) {
+        const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
+        const user = await db.query.users.findFirst({
+          where: eq(users.stripeCustomerId, customerId),
+        });
+        userId = user?.id ?? null;
+      }
       if (!userId) break;
 
       await db
