@@ -10,7 +10,7 @@ import type Stripe from 'stripe';
 function tierFromPriceId(priceId: string): Tier {
   if (priceId === process.env.STRIPE_PRO_PRICE_ID) return 'pro';
   if (priceId === process.env.STRIPE_STARTER_PRICE_ID) return 'starter';
-  return 'starter'; // fallback for unknown price IDs
+  throw new Error(`Unknown Stripe price ID: ${priceId}`);
 }
 
 /** Extract period timestamps from a subscription's first item. */
