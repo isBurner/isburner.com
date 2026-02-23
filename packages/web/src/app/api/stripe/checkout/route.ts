@@ -45,6 +45,28 @@ export async function POST(req: Request) {
       .where(eq(users.id, userId));
   }
 
+  // If user already has an active subscription, update it instead of creating a new one
+  if (user.stripeSubscriptionId) {
+    const existingSub = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+    if (existingSub.status === 'active' || existingSub.status === 'trialing') {
+      await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        items: [
+          {
+            id: existingSub.items.data[0].id,
+            price: priceId,
+          },
+        ],
+        proration_behavior: 'create_prorations',
+      });
+
+      // Tier update handled by the subscription.updated webhook — don't update eagerly
+      // as the proration invoice may fail, leaving the user on the wrong tier.
+      return NextResponse.json({
+        url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://isburner.com'}/dashboard/billing?success=true`,
+      });
+    }
+  }
+
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
