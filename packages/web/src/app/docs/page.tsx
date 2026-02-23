@@ -53,6 +53,15 @@ const techArticleSchema = {
   proficiencyLevel: 'Beginner',
 };
 
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'API Documentation', item: `${SITE_URL}/docs` },
+  ],
+};
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">{children}</span>
@@ -429,6 +438,7 @@ export default function DocsPage() {
   return (
     <div className="noise relative">
       <JsonLd data={techArticleSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <Nav />
       <main>
         <DocsHero />
