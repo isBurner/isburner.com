@@ -11,9 +11,11 @@ import { TIER_CONFIG, type Tier } from '@/lib/tier-config';
 
 const MAX_KEYS_PER_USER = 5;
 
-export async function createApiKey(name: string): Promise<{ key: string } | { error: string }> {
+export async function createApiKey(rawName: string): Promise<{ key: string } | { error: string }> {
   const { userId } = await auth();
   if (!userId) return { error: 'Unauthorized' };
+
+  const name = (rawName || 'Unnamed').trim().slice(0, 100);
 
   // Check key limit
   const existing = await db.query.apiKeys.findMany({
@@ -39,7 +41,7 @@ export async function createApiKey(name: string): Promise<{ key: string } | { er
       userId,
       keyHash,
       keyPrefix,
-      name: name || 'Unnamed',
+      name,
     })
     .returning({ id: apiKeys.id });
 

@@ -54,6 +54,7 @@ export default function CreateKeyForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Key name"
+            maxLength={100}
             className="rounded-lg border border-border bg-bg px-3 py-2 font-mono text-sm text-text placeholder:text-text-faint focus:border-accent focus:outline-none"
           />
           <button
