@@ -12,6 +12,7 @@ type CollapsibleProps = {
 export default function Collapsible({ title, children }: CollapsibleProps) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const chevronRef = useRef<HTMLSpanElement>(null);
   const animatingRef = useRef(false);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -35,6 +36,7 @@ export default function Collapsible({ title, children }: CollapsibleProps) {
     }
 
     if (details.open) {
+      if (chevronRef.current) chevronRef.current.style.rotate = '0deg';
       content.style.gridTemplateRows = '0fr';
       onceDone(() => {
         details.removeAttribute('open');
@@ -42,6 +44,7 @@ export default function Collapsible({ title, children }: CollapsibleProps) {
         animatingRef.current = false;
       });
     } else {
+      if (chevronRef.current) chevronRef.current.style.rotate = '90deg';
       details.setAttribute('open', '');
       content.style.gridTemplateRows = '0fr';
       content.getBoundingClientRect();
@@ -62,7 +65,11 @@ export default function Collapsible({ title, children }: CollapsibleProps) {
         onClick={handleClick}
         className="cursor-pointer list-none px-6 py-4 font-mono text-sm font-medium text-text transition-colors group-open:text-accent [&::-webkit-details-marker]:hidden"
       >
-        <span className="mr-3 inline-block font-mono text-accent transition-transform group-open:rotate-90">
+        <span
+          ref={chevronRef}
+          className="mr-3 inline-block font-mono text-accent"
+          style={{ transition: `rotate ${DURATION}ms ease-out` }}
+        >
           &gt;
         </span>
         {title}
