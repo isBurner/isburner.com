@@ -2,6 +2,8 @@ import type { Tier } from './tier-config';
 import { TIER_CONFIG } from './tier-config';
 
 const CF_API_BASE = 'https://api.cloudflare.com/client/v4';
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 500;
 
 function kvUrl(key: string): string {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
@@ -27,6 +29,24 @@ export interface KVKeyData {
   billingPeriodStart: string | null;
 }
 
+/** Fetch with retry for transient KV failures. */
+async function kvFetch(url: string, init: RequestInit): Promise<Response> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const res = await fetch(url, init);
+      if (res.ok || res.status < 500) return res;
+      lastError = new Error(`KV request failed: ${res.status}`);
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+    }
+    if (attempt < MAX_RETRIES) {
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+    }
+  }
+  throw lastError;
+}
+
 /** Write API key metadata to Cloudflare KV for fast reads at the edge. */
 export async function syncKeyToKV(keyHash: string, data: KVKeyData): Promise<void> {
   const config = TIER_CONFIG[data.tier];
@@ -36,7 +56,7 @@ export async function syncKeyToKV(keyHash: string, data: KVKeyData): Promise<voi
     monthlyLimit: config.monthlyLimit,
   };
 
-  const res = await fetch(kvUrl(keyHash), {
+  const res = await kvFetch(kvUrl(keyHash), {
     method: 'PUT',
     headers: cfHeaders(),
     body: JSON.stringify(value),
@@ -51,7 +71,7 @@ export async function syncKeyToKV(keyHash: string, data: KVKeyData): Promise<voi
 
 /** Remove an API key from KV (on revoke or user deletion). */
 export async function removeKeyFromKV(keyHash: string): Promise<void> {
-  const res = await fetch(kvUrl(keyHash), {
+  const res = await kvFetch(kvUrl(keyHash), {
     method: 'DELETE',
     headers: cfHeaders(),
   });
