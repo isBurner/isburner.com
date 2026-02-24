@@ -5,16 +5,21 @@ const CF_API_BASE = 'https://api.cloudflare.com/client/v4';
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 500;
 
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required env var: ${name}`);
+  return value;
+}
+
 function kvUrl(key: string): string {
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID!;
-  const namespaceId = process.env.CLOUDFLARE_KV_NAMESPACE_ID!;
+  const accountId = getRequiredEnv('CLOUDFLARE_ACCOUNT_ID');
+  const namespaceId = getRequiredEnv('CLOUDFLARE_KV_NAMESPACE_ID');
   return `${CF_API_BASE}/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/values/${key}`;
 }
 
 function cfHeaders(): HeadersInit {
   return {
-    Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-    'Content-Type': 'application/json',
+    Authorization: `Bearer ${getRequiredEnv('CLOUDFLARE_API_TOKEN')}`,
   };
 }
 
