@@ -7,10 +7,9 @@ import type { AppEnv } from '../types';
  */
 export async function rateLimitMiddleware(c: Context<AppEnv>, next: Next) {
   const apiKey = c.get('apiKey');
-  const keyHash = c.get('keyHash');
 
   const now = Math.floor(Date.now() / 1000);
-  const rlKey = `rl:${keyHash}:${now}`;
+  const rlKey = `rl:${apiKey.userId}:${now}`;
 
   const current = await c.env.API_KEYS.get(rlKey);
   const parsed = current ? parseInt(current, 10) : 0;

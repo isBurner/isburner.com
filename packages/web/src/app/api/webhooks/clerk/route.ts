@@ -109,7 +109,12 @@ export async function POST(req: Request) {
 
         // Cancel Stripe subscription before deleting DB records
         if (user?.stripeSubscriptionId) {
-          await stripe.subscriptions.cancel(user.stripeSubscriptionId).catch(console.error);
+          try {
+            await stripe.subscriptions.cancel(user.stripeSubscriptionId);
+          } catch (e) {
+            console.error('Failed to cancel Stripe subscription for deleted user:', e);
+            // Don't block user deletion — Stripe will eventually cancel due to failed payments
+          }
         }
 
         // Remove all active keys from KV before cascade-deleting from DB

@@ -14,39 +14,25 @@ internal.use('*', async (c, next) => {
 });
 
 /**
- * GET /internal/usage?keyHash=xxx
- * Returns the current month's usage count for a key from KV.
+ * GET /internal/usage?userId=xxx[&billingPeriodStart=YYYY-MM-DD]
+ * Returns the current period's usage count for a user from KV.
  */
 internal.get('/usage', async (c) => {
-  const keyHash = c.req.query('keyHash');
-  if (!keyHash) {
-    return c.json({ error: 'Missing keyHash parameter' }, 400);
+  const userId = c.req.query('userId');
+  if (!userId) {
+    return c.json({ error: 'Missing userId parameter' }, 400);
   }
 
-  // Look up the key metadata to check for billing period
-  const keyData = await c.env.API_KEYS.get(keyHash);
   const now = new Date();
-  let period: string;
-
   const calendarMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+  const period = c.req.query('billingPeriodStart') || calendarMonth;
 
-  if (keyData) {
-    try {
-      const parsed = JSON.parse(keyData);
-      period = parsed.billingPeriodStart || calendarMonth;
-    } catch {
-      period = calendarMonth;
-    }
-  } else {
-    period = calendarMonth;
-  }
-
-  const usageKey = `usage:${keyHash}:${period}`;
+  const usageKey = `usage:${userId}:${period}`;
   const raw = await c.env.API_KEYS.get(usageKey);
   const parsed = raw ? parseInt(raw, 10) : 0;
   const count = Number.isNaN(parsed) ? 0 : parsed;
 
-  return c.json({ keyHash, period, count });
+  return c.json({ userId, period, count });
 });
 
 export default internal;

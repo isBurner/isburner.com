@@ -219,6 +219,11 @@ export async function POST(req: Request) {
 
     case 'customer.deleted': {
       const customer = event.data.object;
+      // Find the user before clearing references (need userId for KV sync)
+      const affectedUser = await db.query.users.findFirst({
+        where: eq(users.stripeCustomerId, customer.id),
+      });
+
       // Clear stale Stripe references so portal/checkout don't try to use a deleted customer
       await db
         .update(users)
@@ -229,6 +234,11 @@ export async function POST(req: Request) {
           updatedAt: new Date(),
         })
         .where(eq(users.stripeCustomerId, customer.id));
+
+      // Re-sync keys to KV with free tier limits
+      if (affectedUser) {
+        await syncActiveKeys(affectedUser.id, 'free');
+      }
       break;
     }
   }
@@ -256,7 +266,11 @@ async function downgradeUser(userId: string) {
   await syncActiveKeys(userId, 'free');
 }
 
-async function syncActiveKeys(userId: string, tier: Tier, billingPeriodStart: string | null = null) {
+async function syncActiveKeys(
+  userId: string,
+  tier: Tier,
+  billingPeriodStart: string | null = null
+) {
   const keys = await db.query.apiKeys.findMany({
     where: and(eq(apiKeys.userId, userId), eq(apiKeys.isActive, true)),
   });
