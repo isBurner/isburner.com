@@ -1,14 +1,13 @@
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { apiKeys } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { ensureUser } from '@/lib/ensure-user';
 import KeyRow from '@/components/dashboard/KeyRow';
 import CreateKeyForm from './CreateKeyForm';
 
 export default async function KeysPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
+  const user = await ensureUser();
+  const userId = user.id;
 
   const keys = await db.query.apiKeys.findMany({
     where: eq(apiKeys.userId, userId),

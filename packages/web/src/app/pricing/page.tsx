@@ -4,6 +4,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import JsonLd from '@/components/JsonLd';
 import Collapsible from '@/components/Collapsible';
+import { TIER_CONFIG } from '@/lib/tier-config';
 
 const SITE_URL = 'https://isburner.com';
 
@@ -99,41 +100,26 @@ const breadcrumbSchema = {
 
 const plans = [
   {
-    name: 'Free',
+    tier: 'free' as const,
     price: '$0',
     period: 'forever',
     description: 'For side projects and testing.',
-    features: ['1,000 lookups/mo', '10 req/sec', 'Community domain list', 'Community support'],
     cta: 'Start free',
     highlighted: false,
   },
   {
-    name: 'Starter',
+    tier: 'starter' as const,
     price: '$5',
     period: '/mo',
     description: 'For growing apps.',
-    features: [
-      '10,000 lookups/mo',
-      '50 req/sec',
-      'MX heuristic analysis',
-      'Usage dashboard',
-      'Email support',
-    ],
     cta: 'Get started',
     highlighted: false,
   },
   {
-    name: 'Pro',
+    tier: 'pro' as const,
     price: '$19',
     period: '/mo',
     description: 'For production at scale.',
-    features: [
-      '100,000 lookups/mo',
-      '100 req/sec',
-      'MX heuristic analysis',
-      'Usage dashboard',
-      'Priority support',
-    ],
     cta: 'Go Pro',
     highlighted: true,
   },
@@ -180,9 +166,11 @@ function PricingCards() {
     <section className="border-t border-border">
       <div className="mx-auto max-w-6xl px-8 py-24 lg:py-32">
         <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => (
+          {plans.map((plan) => {
+            const config = TIER_CONFIG[plan.tier];
+            return (
             <div
-              key={plan.name}
+              key={plan.tier}
               className={`relative flex flex-col rounded-2xl border p-7 transition-all ${
                 plan.highlighted
                   ? 'glow-accent-strong border-accent/30 bg-accent/5'
@@ -195,7 +183,7 @@ function PricingCards() {
                 </div>
               )}
               <div className="mb-6">
-                <h3 className="font-mono text-sm font-medium text-text-muted">{plan.name}</h3>
+                <h3 className="font-mono text-sm font-medium text-text-muted">{config.name}</h3>
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
                   <span className="text-sm text-text-faint">{plan.period}</span>
@@ -203,7 +191,7 @@ function PricingCards() {
                 <p className="mt-3 text-sm text-text-faint">{plan.description}</p>
               </div>
               <ul className="mb-8 flex-1 space-y-3">
-                {plan.features.map((feature) => (
+                {config.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5 text-sm text-text-muted">
                     <span className="mt-0.5 font-mono text-accent">+</span>
                     {feature}
@@ -221,7 +209,8 @@ function PricingCards() {
                 {plan.cta}
               </Link>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
