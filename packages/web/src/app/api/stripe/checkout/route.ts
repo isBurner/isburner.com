@@ -59,10 +59,7 @@ export async function POST(req: Request) {
     if (user.stripeSubscriptionId) {
       const existingSub = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
       const existingItem = existingSub.items.data[0];
-      if (
-        existingItem &&
-        (existingSub.status === 'active' || existingSub.status === 'trialing')
-      ) {
+      if (existingItem && (existingSub.status === 'active' || existingSub.status === 'trialing')) {
         // Single atomic update: reverse cancellation (if any) and upgrade in one call
         await stripe.subscriptions.update(user.stripeSubscriptionId, {
           cancel_at_period_end: false,

@@ -47,8 +47,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   },
   'guerrillamail.de': {
     provider: 'Guerrilla Mail',
-    description:
-      'German-targeted domain for the Guerrilla Mail disposable email network.',
+    description: 'German-targeted domain for the Guerrilla Mail disposable email network.',
     category: 'temporary-inbox',
     relatedDomains: ['guerrillamail.com', 'guerrillamail.net', 'guerrillamail.org'],
   },
@@ -116,8 +115,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   },
   'yopmail.net': {
     provider: 'YOPmail',
-    description:
-      'Alternate domain for the YOPmail disposable email network.',
+    description: 'Alternate domain for the YOPmail disposable email network.',
     category: 'temporary-inbox',
     relatedDomains: ['yopmail.com', 'yopmail.fr'],
   },
@@ -150,15 +148,13 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   },
   'trashmail.me': {
     provider: 'Trashmail',
-    description:
-      'Alternate domain for the Trashmail disposable email forwarding service.',
+    description: 'Alternate domain for the Trashmail disposable email forwarding service.',
     category: 'forwarding',
     relatedDomains: ['trashmail.com', 'trashmail.net'],
   },
   'trashmail.net': {
     provider: 'Trashmail',
-    description:
-      'Part of the Trashmail network of disposable email forwarding domains.',
+    description: 'Part of the Trashmail network of disposable email forwarding domains.',
     category: 'forwarding',
     relatedDomains: ['trashmail.com', 'trashmail.me'],
   },
@@ -256,8 +252,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- TempMailo ---
   'tempmailo.com': {
     provider: 'TempMailo',
-    description:
-      'Disposable email service that provides temporary inboxes lasting one hour.',
+    description: 'Disposable email service that provides temporary inboxes lasting one hour.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -265,8 +260,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Fake Inbox ---
   'fakeinbox.com': {
     provider: 'Fake Inbox',
-    description:
-      'Disposable email service providing temporary anonymous inboxes for one-time use.',
+    description: 'Disposable email service providing temporary anonymous inboxes for one-time use.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -337,8 +331,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Tempr ---
   'tempr.email': {
     provider: 'Tempr',
-    description:
-      'Disposable email service providing short-lived temporary email addresses.',
+    description: 'Disposable email service providing short-lived temporary email addresses.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -355,8 +348,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Crazymailing ---
   'crazymailing.com': {
     provider: 'CrazyMailing',
-    description:
-      'Disposable email service providing temporary inboxes for anonymous use.',
+    description: 'Disposable email service providing temporary inboxes for anonymous use.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -409,8 +401,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Incognitomail ---
   'incognitomail.org': {
     provider: 'Incognito Mail',
-    description:
-      'Privacy-focused disposable email service for anonymous email reception.',
+    description: 'Privacy-focused disposable email service for anonymous email reception.',
     category: 'anonymous',
     relatedDomains: ['incognitomail.com'],
   },
@@ -427,8 +418,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Filzmail ---
   'filzmail.com': {
     provider: 'Filzmail',
-    description:
-      'Disposable email service providing temporary email addresses for one-time use.',
+    description: 'Disposable email service providing temporary email addresses for one-time use.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -445,8 +435,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Spambox ---
   'spambox.us': {
     provider: 'SpamBox',
-    description:
-      'Disposable email service that catches spam so your real inbox stays clean.',
+    description: 'Disposable email service that catches spam so your real inbox stays clean.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -454,8 +443,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- TrashMail.de ---
   'trashmail.de': {
     provider: 'Trashmail',
-    description:
-      'German domain for the Trashmail disposable email and forwarding service.',
+    description: 'German domain for the Trashmail disposable email and forwarding service.',
     category: 'forwarding',
     relatedDomains: ['trashmail.com', 'trashmail.net', 'trashmail.me'],
   },
@@ -463,8 +451,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- MailDrop aliases ---
   'mailme.lv': {
     provider: 'MailMe',
-    description:
-      'Latvian-based disposable email service providing temporary inboxes.',
+    description: 'Latvian-based disposable email service providing temporary inboxes.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -481,8 +468,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Mailzilla ---
   'mailzilla.com': {
     provider: 'Mailzilla',
-    description:
-      'Disposable email service providing temporary inboxes for short-term use.',
+    description: 'Disposable email service providing temporary inboxes for short-term use.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -517,8 +503,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Temp-mail.de ---
   'temp-mail.de': {
     provider: 'Temp-Mail DE',
-    description:
-      'German temporary email service providing disposable addresses for anonymous use.',
+    description: 'German temporary email service providing disposable addresses for anonymous use.',
     category: 'temporary-inbox',
     relatedDomains: [],
   },
@@ -542,8 +527,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   },
   'guerrillamail.biz': {
     provider: 'Guerrilla Mail',
-    description:
-      'Business-themed domain for the Guerrilla Mail disposable email network.',
+    description: 'Business-themed domain for the Guerrilla Mail disposable email network.',
     category: 'temporary-inbox',
     relatedDomains: ['guerrillamail.com', 'guerrillamail.net'],
   },
@@ -560,8 +544,7 @@ export const DOMAIN_META: Record<string, DomainMeta> = {
   // --- Tempail extended ---
   'tempalias.com': {
     provider: 'TempAlias',
-    description:
-      'Disposable email aliasing service that creates temporary forwarding addresses.',
+    description: 'Disposable email aliasing service that creates temporary forwarding addresses.',
     category: 'forwarding',
     relatedDomains: [],
   },

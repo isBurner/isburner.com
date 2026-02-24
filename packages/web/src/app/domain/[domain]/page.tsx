@@ -96,7 +96,12 @@ export default async function DomainPage({ params }: PageProps) {
   const { domain } = await params;
 
   // Validate domain format — safe characters only (prevents JSON-LD injection via URL params)
-  if (!domain.includes('.') || domain.length > 255 || domain.length < 3 || !/^[a-z0-9][a-z0-9\-.]*\.[a-z]{2,}$/i.test(domain)) {
+  if (
+    !domain.includes('.') ||
+    domain.length > 255 ||
+    domain.length < 3 ||
+    !/^[a-z0-9][a-z0-9\-.]*\.[a-z]{2,}$/i.test(domain)
+  ) {
     notFound();
   }
 
@@ -276,13 +281,7 @@ function DetailsSection({
   );
 }
 
-function AboutSection({
-  domain,
-  meta,
-}: {
-  domain: string;
-  meta: DomainMeta | undefined;
-}) {
+function AboutSection({ domain, meta }: { domain: string; meta: DomainMeta | undefined }) {
   const description = meta
     ? meta.description
     : `${domain} is a disposable email domain found in the isBurner blocklist. Emails from this domain are temporary and should not be trusted for account registration or communication. Blocking disposable domains helps protect your platform from abuse, fake signups, and spam.`;
@@ -352,12 +351,10 @@ if (disposable) {
         <span className="mb-3 block font-mono text-xs tracking-widest text-accent uppercase">
           Integration
         </span>
-        <h2 className="mb-6 text-2xl font-bold tracking-tight">
-          How to Block {domain}
-        </h2>
+        <h2 className="mb-6 text-2xl font-bold tracking-tight">How to Block {domain}</h2>
         <p className="mb-8 max-w-2xl leading-relaxed text-text-muted">
-          Use the isBurner API to detect and block emails from {domain} in your signup flow.
-          One API call, sub-5&#8239;ms response.
+          Use the isBurner API to detect and block emails from {domain} in your signup flow. One API
+          call, sub-5&#8239;ms response.
         </p>
         <CodeBlock title="JavaScript / TypeScript" code={code} />
       </div>
@@ -370,8 +367,7 @@ function CTASection() {
     <section className="bg-bg-surface/30">
       <div className="mx-auto max-w-3xl px-8 py-20 text-center">
         <h2 className="mb-4 font-mono text-2xl font-bold tracking-tight lg:text-3xl">
-          Check any email with the{' '}
-          <span className="text-glow text-accent">isBurner API</span>
+          Check any email with the <span className="text-glow text-accent">isBurner API</span>
         </h2>
         <p className="mb-8 text-text-muted">
           72,000+ disposable domains. MX heuristics. Sub-5&#8239;ms response. Free to start.

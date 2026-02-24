@@ -16,12 +16,7 @@ export const TIER_CONFIG: Record<Tier, TierConfig> = {
     monthlyLimit: 1_000,
     mxAnalysis: false,
     support: 'Community support',
-    features: [
-      '1,000 lookups/mo',
-      '10 req/sec',
-      'Community domain list',
-      'Community support',
-    ],
+    features: ['1,000 lookups/mo', '10 req/sec', 'Community domain list', 'Community support'],
   },
   starter: {
     name: 'Starter',

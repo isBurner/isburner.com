@@ -169,46 +169,46 @@ function PricingCards() {
           {plans.map((plan) => {
             const config = TIER_CONFIG[plan.tier];
             return (
-            <div
-              key={plan.tier}
-              className={`relative flex flex-col rounded-2xl border p-7 transition-all ${
-                plan.highlighted
-                  ? 'glow-accent-strong border-accent/30 bg-accent/5'
-                  : 'border-border bg-bg-surface/60 hover:border-border-bright'
-              }`}
-            >
-              {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-4 py-1 font-mono text-xs font-semibold text-bg">
-                  Popular
-                </div>
-              )}
-              <div className="mb-6">
-                <h3 className="font-mono text-sm font-medium text-text-muted">{config.name}</h3>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
-                  <span className="text-sm text-text-faint">{plan.period}</span>
-                </div>
-                <p className="mt-3 text-sm text-text-faint">{plan.description}</p>
-              </div>
-              <ul className="mb-8 flex-1 space-y-3">
-                {config.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-sm text-text-muted">
-                    <span className="mt-0.5 font-mono text-accent">+</span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/sign-up"
-                className={`block rounded-xl py-3 text-center font-mono text-sm transition-all ${
+              <div
+                key={plan.tier}
+                className={`relative flex flex-col rounded-2xl border p-7 transition-all ${
                   plan.highlighted
-                    ? 'bg-accent font-semibold text-bg hover:bg-accent-dim'
-                    : 'border border-border text-text-muted hover:border-border-bright hover:text-text'
+                    ? 'glow-accent-strong border-accent/30 bg-accent/5'
+                    : 'border-border bg-bg-surface/60 hover:border-border-bright'
                 }`}
               >
-                {plan.cta}
-              </Link>
-            </div>
+                {plan.highlighted && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-4 py-1 font-mono text-xs font-semibold text-bg">
+                    Popular
+                  </div>
+                )}
+                <div className="mb-6">
+                  <h3 className="font-mono text-sm font-medium text-text-muted">{config.name}</h3>
+                  <div className="mt-3 flex items-baseline gap-1">
+                    <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
+                    <span className="text-sm text-text-faint">{plan.period}</span>
+                  </div>
+                  <p className="mt-3 text-sm text-text-faint">{plan.description}</p>
+                </div>
+                <ul className="mb-8 flex-1 space-y-3">
+                  {config.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2.5 text-sm text-text-muted">
+                      <span className="mt-0.5 font-mono text-accent">+</span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/sign-up"
+                  className={`block rounded-xl py-3 text-center font-mono text-sm transition-all ${
+                    plan.highlighted
+                      ? 'bg-accent font-semibold text-bg hover:bg-accent-dim'
+                      : 'border border-border text-text-muted hover:border-border-bright hover:text-text'
+                  }`}
+                >
+                  {plan.cta}
+                </Link>
+              </div>
             );
           })}
         </div>
