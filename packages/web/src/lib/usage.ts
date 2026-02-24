@@ -1,6 +1,6 @@
 import { db } from './db';
 import { usageLogs, subscriptions } from './db/schema';
-import { eq, and, sql, gte } from 'drizzle-orm';
+import { eq, and, sql, gte, inArray } from 'drizzle-orm';
 
 /** Get total usage for a user in the current billing period.
  *  Paid users: counts from their Stripe billing period start.
@@ -15,7 +15,7 @@ export async function getCurrentMonthUsage(
     periodStart = billingPeriodStart;
   } else {
     const now = new Date();
-    periodStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    periodStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-01`;
   }
 
   const result = await db
@@ -49,10 +49,14 @@ export async function getDailyUsage(
 }
 
 /** Look up the current billing period start for a user.
- *  Returns YYYY-MM-DD string for paid users, null for free users. */
+ *  Returns YYYY-MM-DD string for paid users, null for free users.
+ *  Matches the webhook logic that grants access for active, trialing, and past_due. */
 export async function getBillingPeriodStart(userId: string): Promise<string | null> {
   const sub = await db.query.subscriptions.findFirst({
-    where: and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')),
+    where: and(
+      eq(subscriptions.userId, userId),
+      inArray(subscriptions.status, ['active', 'trialing', 'past_due'])
+    ),
   });
 
   if (!sub?.currentPeriodStart) return null;
