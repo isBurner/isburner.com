@@ -203,6 +203,21 @@ export async function POST(req: Request) {
       console.error('Payment failed for customer:', invoice.customer);
       break;
     }
+
+    case 'customer.deleted': {
+      const customer = event.data.object;
+      // Clear stale Stripe references so portal/checkout don't try to use a deleted customer
+      await db
+        .update(users)
+        .set({
+          tier: 'free' as Tier,
+          stripeCustomerId: null,
+          stripeSubscriptionId: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.stripeCustomerId, customer.id));
+      break;
+    }
   }
 
   return NextResponse.json({ received: true });
