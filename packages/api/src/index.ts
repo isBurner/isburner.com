@@ -63,6 +63,11 @@ app.get('/api/check', async (c) => {
     return c.json({ error: 'Missing required parameter: email' }, 400);
   }
 
+  // RFC 5321: email addresses must be ≤ 254 characters
+  if (email.length > 254) {
+    return c.json({ error: 'Invalid email format' }, 400);
+  }
+
   // Basic email format validation
   const atIndex = email.lastIndexOf('@');
   if (atIndex < 1 || atIndex === email.length - 1) {

@@ -19,7 +19,8 @@ export async function usageMiddleware(c: Context<AppEnv>, next: Next) {
 
   // Check current usage
   const raw = await c.env.API_KEYS.get(usageKey);
-  const currentUsage = raw ? parseInt(raw, 10) : 0;
+  const parsed = raw ? parseInt(raw, 10) : 0;
+  const currentUsage = Number.isNaN(parsed) ? 0 : parsed;
 
   if (currentUsage >= apiKey.monthlyLimit) {
     return c.json(

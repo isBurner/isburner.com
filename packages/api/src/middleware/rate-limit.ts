@@ -13,9 +13,11 @@ export async function rateLimitMiddleware(c: Context<AppEnv>, next: Next) {
   const rlKey = `rl:${keyHash}:${now}`;
 
   const current = await c.env.API_KEYS.get(rlKey);
-  const count = current ? parseInt(current, 10) : 0;
+  const parsed = current ? parseInt(current, 10) : 0;
+  const count = Number.isNaN(parsed) ? 0 : parsed;
 
   if (count >= apiKey.rateLimit) {
+    c.header('Retry-After', '1');
     return c.json(
       {
         error: 'Rate limit exceeded.',

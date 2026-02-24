@@ -28,7 +28,12 @@ export async function authMiddleware(c: Context<AppEnv>, next: Next) {
     return c.json({ error: 'Invalid API key.' }, 401);
   }
 
-  const data: ApiKeyData = JSON.parse(raw);
+  let data: ApiKeyData;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return c.json({ error: 'Invalid API key.' }, 401);
+  }
 
   if (!data.isActive) {
     return c.json({ error: 'API key has been revoked.' }, 401);

@@ -1,12 +1,13 @@
 import { Hono } from 'hono';
 import type { Env } from '../types';
+import { timingSafeEqual } from '../util';
 
 const internal = new Hono<{ Bindings: Env }>();
 
 /** Protect internal routes with a shared secret. */
 internal.use('*', async (c, next) => {
   const secret = c.req.header('X-Internal-Secret');
-  if (secret !== c.env.INTERNAL_SECRET) {
+  if (!secret || !timingSafeEqual(secret, c.env.INTERNAL_SECRET)) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
   await next();
@@ -27,18 +28,23 @@ internal.get('/usage', async (c) => {
   const now = new Date();
   let period: string;
 
+  const calendarMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+
   if (keyData) {
-    const parsed = JSON.parse(keyData);
-    period = parsed.billingPeriodStart
-      ? parsed.billingPeriodStart
-      : `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+    try {
+      const parsed = JSON.parse(keyData);
+      period = parsed.billingPeriodStart || calendarMonth;
+    } catch {
+      period = calendarMonth;
+    }
   } else {
-    period = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+    period = calendarMonth;
   }
 
   const usageKey = `usage:${keyHash}:${period}`;
   const raw = await c.env.API_KEYS.get(usageKey);
-  const count = raw ? parseInt(raw, 10) : 0;
+  const parsed = raw ? parseInt(raw, 10) : 0;
+  const count = Number.isNaN(parsed) ? 0 : parsed;
 
   return c.json({ keyHash, period, count });
 });
