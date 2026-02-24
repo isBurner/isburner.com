@@ -3,6 +3,9 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import JsonLd from '@/components/JsonLd';
 import CodeBlock from '@/components/CodeBlock';
+import ApiPlayground from '@/components/docs/ApiPlayground';
+import CodeTabs from '@/components/docs/CodeTabs';
+import { getSnippets } from '@/lib/code-snippets';
 
 const SITE_URL = 'https://isburner.com';
 const API_BASE = 'https://api.isburner.com';
@@ -158,11 +161,7 @@ function CheckEndpoint() {
         {/* Request Example */}
         <h3 className="mb-4 text-lg font-semibold">Request</h3>
         <div className="mb-10">
-          <CodeBlock
-            title="cURL"
-            code={`curl -H "X-API-Key: your_api_key" \\
-  "${API_BASE}/api/check?email=user@tempmail.com"`}
-          />
+          <CodeTabs snippets={getSnippets('user@tempmail.com', 'your_api_key')} />
         </div>
 
         {/* Response Schema */}
@@ -439,6 +438,7 @@ function TableOfContents() {
   const sections = [
     { id: 'authentication', label: 'Authentication' },
     { id: 'check-email', label: 'Check Email' },
+    { id: 'playground', label: 'Playground' },
     { id: 'detection', label: 'Detection Methods' },
     { id: 'rate-limits', label: 'Rate Limits' },
     { id: 'health', label: 'Health Check' },
@@ -473,6 +473,7 @@ export default function DocsPage() {
         <TableOfContents />
         <AuthSection />
         <CheckEndpoint />
+        <ApiPlayground />
         <DetectionMethods />
         <RateLimits />
         <HealthEndpoint />

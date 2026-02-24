@@ -173,6 +173,42 @@
     border-radius: inherit;
   }
 
+  /* ---- Code tabs ---- */
+  .code-tab {
+    padding: 8px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-faint);
+    border-bottom: 2px solid transparent;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
+    cursor: pointer;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .code-tab:hover {
+    color: var(--color-text-muted);
+  }
+
+  .code-tab-active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+
+  /* ---- Copy button ---- */
+  .copy-btn {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .terminal:hover .copy-btn {
+    opacity: 1;
+  }
+
   /* ---- Noise texture overlay ---- */
   .noise::before {
     content: '';
