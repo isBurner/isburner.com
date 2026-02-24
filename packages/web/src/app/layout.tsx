@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: '%s | isBurner',
   },
   description:
-    'Is this email trash? One API call to find out. Fast, affordable disposable email detection for developers. 30,000+ known domains, MX heuristics, sub-5ms response.',
+    'Is this email trash? One API call to find out. Fast, affordable disposable email detection for developers. 72,000+ known domains, MX heuristics, sub-5ms response.',
   keywords: [
     'disposable email API',
     'burner email detection',
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     siteName: 'isBurner',
     title: 'isBurner — Disposable Email Detection API',
     description:
-      'Is this email trash? One API call to find out. 30,000+ known domains, MX heuristics, sub-5ms response.',
+      'Is this email trash? One API call to find out. 72,000+ known domains, MX heuristics, sub-5ms response.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'isBurner — Disposable Email Detection API',
     description:
-      'Is this email trash? One API call to find out. 30,000+ known domains, MX heuristics, sub-5ms response.',
+      'Is this email trash? One API call to find out. 72,000+ known domains, MX heuristics, sub-5ms response.',
   },
   alternates: {
     canonical: SITE_URL,

@@ -10,7 +10,7 @@ const API_BASE = 'https://api.isburner.com';
 export const metadata: Metadata = {
   title: 'API Documentation',
   description:
-    'isBurner API reference — disposable email detection in one GET request. Check any email against 30,000+ known domains with MX heuristic analysis.',
+    'isBurner API reference — disposable email detection in one GET request. Check any email against 72,000+ known domains with MX heuristic analysis.',
   keywords: [
     'disposable email API documentation',
     'email validation API reference',
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'API Documentation | isBurner',
     description:
-      'Disposable email detection API reference. One GET request, sub-5ms response, 30,000+ domains.',
+      'Disposable email detection API reference. One GET request, sub-5ms response, 72,000+ domains.',
     url: `${SITE_URL}/docs`,
   },
   twitter: {
     title: 'API Documentation | isBurner',
     description:
-      'Disposable email detection API reference. One GET request, sub-5ms response, 30,000+ domains.',
+      'Disposable email detection API reference. One GET request, sub-5ms response, 72,000+ domains.',
   },
   alternates: {
     canonical: `${SITE_URL}/docs`,
@@ -315,7 +315,7 @@ function DetectionMethods() {
             </div>
             <h3 className="mb-3 text-lg font-semibold">Blocklist matching</h3>
             <p className="text-sm leading-relaxed text-text-muted">
-              Every request is checked against 30,000+ known disposable email domains. The list is
+              Every request is checked against 72,000+ known disposable email domains. The list is
               open-source, community-maintained, and updated daily. Blocklist matches return a score
               of <code className="text-text">1.0</code>.
             </p>

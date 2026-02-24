@@ -33,7 +33,7 @@ const productSchema = {
   image: `${SITE_URL}/og-image.png`,
   brand: { '@type': 'Organization', name: 'isBurner' },
   description:
-    'Disposable email detection API. 30,000+ known domains, MX heuristics, sub-5ms response.',
+    'Disposable email detection API. 72,000+ known domains, MX heuristics, sub-5ms response.',
   offers: [
     {
       '@type': 'Offer',
@@ -109,7 +109,7 @@ function Hero() {
             </h1>
 
             <p className="boot-in d3 mb-10 max-w-md text-lg leading-relaxed text-text-muted">
-              One API call. Sub-5&#8239;ms response. 30,000+ known disposable domains plus MX
+              One API call. Sub-5&#8239;ms response. 72,000+ known disposable domains plus MX
               heuristics that catch the rest.
             </p>
 

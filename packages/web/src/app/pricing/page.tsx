@@ -40,7 +40,7 @@ const productSchema = {
   '@type': 'Product',
   name: 'isBurner API',
   description:
-    'Disposable email detection API. 30,000+ known domains, MX heuristic analysis, sub-5ms response.',
+    'Disposable email detection API. 72,000+ known domains, MX heuristic analysis, sub-5ms response.',
   url: `${SITE_URL}/pricing`,
   image: `${SITE_URL}/og-image.png`,
   brand: { '@type': 'Organization', name: 'isBurner' },
@@ -274,7 +274,7 @@ function FAQ() {
   const questions = [
     {
       q: 'Is there a free disposable email detection API?',
-      a: 'Yes. isBurner offers a free tier with 1,000 lookups per month, 10 requests per second, and access to our 30,000+ domain blocklist. No credit card required — create an account, grab your API key, and start blocking burner emails. Free tier includes community support via GitHub.',
+      a: 'Yes. isBurner offers a free tier with 1,000 lookups per month, 10 requests per second, and access to our 72,000+ domain blocklist. No credit card required — create an account, grab your API key, and start blocking burner emails. Free tier includes community support via GitHub.',
     },
     {
       q: 'How much does an email validation API cost?',
