@@ -34,12 +34,14 @@ export default function ApiKeyDisplay({ keyPrefix, fullKey }: ApiKeyDisplayProps
           Reveal
         </button>
       )}
-      <button
-        onClick={handleCopy}
-        className="rounded-lg border border-border px-3 py-2 font-mono text-xs text-text-muted transition-colors hover:border-border-bright hover:text-text"
-      >
-        {copied ? 'Copied' : 'Copy'}
-      </button>
+      {fullKey && (
+        <button
+          onClick={handleCopy}
+          className="rounded-lg border border-border px-3 py-2 font-mono text-xs text-text-muted transition-colors hover:border-border-bright hover:text-text"
+        >
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      )}
     </div>
   );
 }
