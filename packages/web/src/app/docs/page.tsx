@@ -48,7 +48,7 @@ const techArticleSchema = {
     logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.svg`, width: 512, height: 512 },
   },
   datePublished: '2025-02-22',
-  dateModified: '2025-02-22',
+  dateModified: '2026-02-23',
   mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/docs` },
   proficiencyLevel: 'Beginner',
 };

@@ -6,12 +6,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: '/dashboard',
+        disallow: ['/dashboard', '/api/'],
       },
       {
         userAgent: ['GPTBot', 'ChatGPT-User', 'Google-Extended'],
         allow: '/',
-        disallow: '/dashboard',
+        disallow: ['/dashboard', '/api/'],
       },
     ],
     sitemap: 'https://isburner.com/sitemap.xml',

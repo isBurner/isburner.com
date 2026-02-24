@@ -95,8 +95,8 @@ function getRelatedDomains(domain: string): string[] {
 export default async function DomainPage({ params }: PageProps) {
   const { domain } = await params;
 
-  // Validate domain format
-  if (!domain.includes('.') || domain.length > 255 || domain.length < 3) {
+  // Validate domain format — safe characters only (prevents JSON-LD injection via URL params)
+  if (!domain.includes('.') || domain.length > 255 || domain.length < 3 || !/^[a-z0-9][a-z0-9\-.]*\.[a-z]{2,}$/i.test(domain)) {
     notFound();
   }
 
