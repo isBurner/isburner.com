@@ -42,7 +42,7 @@ const productSchema = {
   description:
     'Disposable email detection API. 72,000+ known domains, MX heuristic analysis, sub-5ms response.',
   url: `${SITE_URL}/pricing`,
-  image: `${SITE_URL}/og-image.png`,
+  image: `${SITE_URL}/opengraph-image`,
   brand: { '@type': 'Organization', name: 'isBurner' },
   offers: [
     {

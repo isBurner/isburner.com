@@ -30,7 +30,7 @@ const productSchema = {
   '@type': 'Product',
   name: 'isBurner API',
   url: SITE_URL,
-  image: `${SITE_URL}/og-image.png`,
+  image: `${SITE_URL}/opengraph-image`,
   brand: { '@type': 'Organization', name: 'isBurner' },
   description:
     'Disposable email detection API. 72,000+ known domains, MX heuristics, sub-5ms response.',
