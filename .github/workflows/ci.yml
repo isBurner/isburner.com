@@ -11,6 +11,9 @@ jobs:
       # Clerk publishable key is public (embedded in client JS) so safe in CI
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      # Sentry (source map upload during build)
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
       # Dummy values for build — no real calls are made during static generation
       DATABASE_URL: postgresql://placeholder:placeholder@localhost/placeholder
       STRIPE_SECRET_KEY: sk_test_placeholder

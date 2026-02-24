@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code when working with code in this repository.
 
+## Security
+
+- **NEVER read `.env`, `.env.local`, `.env.*`, or `.dev.vars` files.** These contain secrets (API keys, database credentials, webhook secrets). If you need to know what env vars exist, read `.env.local.example` instead.
+- Never log, echo, or output secret values.
+- Never commit files that contain secrets.
+
 ## Engineering Standards
 
 This project is maintained by a staff-level engineer with 15 years of experience. The bar is production-grade, not prototype-grade. Every file committed should be something you'd defend in a code review.
