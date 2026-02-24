@@ -7,6 +7,13 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      # Dummy values for build-time static page generation (no real calls are made)
+      DATABASE_URL: postgresql://placeholder:placeholder@localhost/placeholder
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+      STRIPE_STARTER_PRICE_ID: price_placeholder
+      STRIPE_PRO_PRICE_ID: price_placeholder
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
