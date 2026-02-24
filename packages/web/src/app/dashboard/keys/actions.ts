@@ -1,0 +1,96 @@
+'use server';
+
+import { auth } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
+import { db } from '@/lib/db';
+import { users, apiKeys } from '@/lib/db/schema';
+import { eq, and } from 'drizzle-orm';
+import { getBillingPeriodStart } from '@/lib/usage';
+import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/keys';
+import { syncKeyToKV, removeKeyFromKV } from '@/lib/kv-sync';
+import { TIER_CONFIG, type Tier } from '@/lib/tier-config';
+
+const MAX_KEYS_PER_USER = 5;
+
+export async function createApiKey(rawName: string): Promise<{ key: string } | { error: string }> {
+  const { userId } = await auth();
+  if (!userId) return { error: 'Unauthorized' };
+
+  const name = ((rawName || '').trim() || 'Unnamed').slice(0, 100);
+
+  // Check key limit
+  const existing = await db.query.apiKeys.findMany({
+    where: and(eq(apiKeys.userId, userId), eq(apiKeys.isActive, true)),
+  });
+
+  if (existing.length >= MAX_KEYS_PER_USER) {
+    return { error: `Maximum ${MAX_KEYS_PER_USER} active keys allowed` };
+  }
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+  if (!user) return { error: 'User not found' };
+
+  const rawKey = generateApiKey();
+  const keyHash = hashApiKey(rawKey);
+  const keyPrefix = getKeyPrefix(rawKey);
+
+  const [inserted] = await db
+    .insert(apiKeys)
+    .values({
+      userId,
+      keyHash,
+      keyPrefix,
+      name,
+    })
+    .returning({ id: apiKeys.id });
+
+  // Sync to KV
+  try {
+    const billingPeriodStart = await getBillingPeriodStart(userId);
+    await syncKeyToKV(keyHash, {
+      userId,
+      keyId: inserted.id,
+      tier: user.tier as Tier,
+      rateLimit: TIER_CONFIG[user.tier as Tier].rateLimit,
+      monthlyLimit: TIER_CONFIG[user.tier as Tier].monthlyLimit,
+      isActive: true,
+      billingPeriodStart,
+    });
+  } catch (e) {
+    console.error('Failed to sync new key to KV:', e);
+  }
+
+  revalidatePath('/dashboard/keys');
+  revalidatePath('/dashboard');
+  return { key: rawKey };
+}
+
+export async function revokeApiKey(keyId: string): Promise<{ error?: string }> {
+  const { userId } = await auth();
+  if (!userId) return { error: 'Unauthorized' };
+
+  const key = await db.query.apiKeys.findFirst({
+    where: and(eq(apiKeys.id, keyId), eq(apiKeys.userId, userId)),
+  });
+
+  if (!key) return { error: 'Key not found' };
+  if (!key.isActive) return { error: 'Key already revoked' };
+
+  await db
+    .update(apiKeys)
+    .set({ isActive: false, revokedAt: new Date() })
+    .where(and(eq(apiKeys.id, keyId), eq(apiKeys.userId, userId)));
+
+  // Remove from KV
+  try {
+    await removeKeyFromKV(key.keyHash);
+  } catch (e) {
+    console.error('Failed to remove key from KV:', e);
+  }
+
+  revalidatePath('/dashboard/keys');
+  revalidatePath('/dashboard');
+  return {};
+}

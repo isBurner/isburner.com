@@ -1,0 +1,45 @@
+# isBurner
+
+> Disposable email detection API for developers. One GET request to check if an email is from a throwaway provider.
+
+isBurner answers one question: "Is this email from a disposable provider?" It checks against 30,000+ known disposable domains and uses MX record heuristics to catch new services that static blocklists miss. Responses are sub-5ms from Cloudflare's edge network.
+
+## API
+
+Base URL: https://api.isburner.com
+
+### Check Email
+
+GET /api/check?email=user@tempmail.com
+
+Returns:
+- `disposable` (boolean): whether the email is from a disposable provider
+- `score` (0-1): confidence score
+- `reasons` (string[]): why the email was flagged (e.g. "Known disposable domain", "MX records route through Mailinator")
+
+### Authentication
+
+All requests require an API key via the `X-API-Key` header. Get a free key at https://isburner.com.
+
+### Health Check
+
+GET /health — returns API status, loaded domain count, and MX pattern count.
+
+## Pricing
+
+- **Free**: $0/mo — 1,000 lookups/mo, 10 req/sec, blocklist detection
+- **Starter**: $5/mo — 25,000 lookups/mo, 50 req/sec, MX heuristic analysis, usage dashboard
+
+No credit card required for free tier.
+
+## Detection Methods
+
+1. **Blocklist**: 30,000+ known disposable domains (in-memory Set, sub-microsecond lookup)
+2. **MX Heuristics**: Analyzes MX records to detect custom domains routing through known throwaway infrastructure
+
+## Links
+
+- Website: https://isburner.com
+- API Docs: https://isburner.com/docs
+- Pricing: https://isburner.com/pricing
+- GitHub: https://github.com/isBurner

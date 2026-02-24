@@ -2,6 +2,18 @@
 
 This file provides guidance to Claude Code when working with code in this repository.
 
+## Engineering Standards
+
+This project is maintained by a staff-level engineer with 15 years of experience. The bar is production-grade, not prototype-grade. Every file committed should be something you'd defend in a code review.
+
+- **No slop.** No vibe-coded throwaway code. Every component, utility, and config should be intentional, well-structured, and maintainable.
+- **DRY.** Extract shared logic. If something appears twice, it should be a function, constant, or component. But don't over-abstract — three similar lines is fine, a premature abstraction is not.
+- **Readable code > clever code.** Name things clearly. Keep functions short. Prefer explicit over implicit. A new developer should understand any file in under 60 seconds.
+- **SEO-first.** Every page must have proper metadata, Open Graph tags, structured data (JSON-LD), and semantic HTML. SEO is not an afterthought — it's a core acquisition channel.
+- **Tailwind CSS 4 + CSS Cascade Layers.** All custom CSS must be inside `@layer base` or `@layer components`. NEVER write unlayered CSS — it overrides all Tailwind utilities due to cascade layer precedence. This burned us once; it will not happen again.
+- **TypeScript strict mode.** No `any`. No `// @ts-ignore`. If the types are hard, that means the code needs restructuring.
+- **Test what matters.** Critical paths (API responses, domain matching, billing logic) must have tests. UI pixel-perfection does not need tests.
+
 ## Project Overview
 
 isBurner (isburner.com) is a disposable email detection API for developers. It answers one question: "Is this email from a throwaway provider?" Built as a Turborepo monorepo with two packages:
@@ -11,7 +23,7 @@ isBurner (isburner.com) is a disposable email detection API for developers. It a
 
 ## Business Goals
 
-isBurner is a paid SaaS product targeting developers. Revenue comes from API subscriptions (free tier + paid tiers). Key priorities:
+isBurner is a paid SaaS product targeting developers. Revenue comes from API subscriptions (Free + Starter tiers). Key priorities:
 
 - **Reliability above all.** The API must be fast (< 50ms globally) and available (leveraging Cloudflare's edge network). Developers integrate this into their signup flows — downtime means their signups break.
 - **Developer experience.** Clean API design, clear docs, helpful error messages. Developers are the customer.
@@ -68,10 +80,11 @@ CI runs lint, format:check, and build on PRs to `staging`.
 
 Dark, terminal-forward aesthetic. NOT generic AI-generated UI.
 
-- **Background**: Near-black (#0a0a0a), surfaces (#141414), elevated (#1a1a1a)
+- **Background**: Near-black (#06060a), surfaces (#0e0e14), elevated (#14141c)
 - **Accent**: Terminal green (#00ff88)
-- **Fonts**: Geist Sans (body), Geist Mono (code)
-- **Principles**: Monospace-forward, code blocks prominent, asymmetric layouts, real personality in copy, no stock illustrations, no gradients
+- **Fonts**: Geist Sans (body), Geist Mono (code, headings, nav)
+- **Principles**: Monospace-forward, code blocks prominent, real personality in copy, no stock illustrations
+- **Animations**: No generic slide-up fade-ins. Use terminal-inspired effects (boot-in, HUD slide, brightness pulse). Animations should feel like a system powering on, not a PowerPoint deck.
 
 ## Architecture
 
@@ -83,7 +96,18 @@ Dark, terminal-forward aesthetic. NOT generic AI-generated UI.
 ### Web (packages/web/)
 
 - `src/app/` — Next.js App Router pages
-- `src/app/globals.css` — Tailwind theme with CSS custom properties
+- `src/app/layout.tsx` — Root layout with fonts, global metadata
+- `src/app/page.tsx` — Landing page (Nav, Hero, HowItWorks, WhySection, Pricing, CTA, Footer)
+- `src/app/globals.css` — Tailwind theme (`@theme`), base styles (`@layer base`), component styles (`@layer components`), keyframe animations
+- `src/components/` — Shared React components
+
+### SEO Requirements (every page)
+
+- Metadata export with title, description, Open Graph, Twitter Card
+- JSON-LD structured data where applicable
+- Semantic HTML (`<main>`, `<article>`, `<section>`, `<nav>`, `<footer>`)
+- `sitemap.ts` and `robots.ts` in `src/app/`
+- Favicons and social preview images in `public/`
 
 ## Code Style
 

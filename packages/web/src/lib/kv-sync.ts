@@ -1,0 +1,111 @@
+import type { Tier } from './tier-config';
+import { TIER_CONFIG } from './tier-config';
+
+const CF_API_BASE = 'https://api.cloudflare.com/client/v4';
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 500;
+
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required env var: ${name}`);
+  return value;
+}
+
+function kvUrl(key: string): string {
+  const accountId = getRequiredEnv('CLOUDFLARE_ACCOUNT_ID');
+  const namespaceId = getRequiredEnv('CLOUDFLARE_KV_NAMESPACE_ID');
+  return `${CF_API_BASE}/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/values/${key}`;
+}
+
+function cfHeaders(): HeadersInit {
+  return {
+    Authorization: `Bearer ${getRequiredEnv('CLOUDFLARE_API_TOKEN')}`,
+  };
+}
+
+export interface KVKeyData {
+  userId: string;
+  keyId: string;
+  tier: Tier;
+  rateLimit: number;
+  monthlyLimit: number;
+  isActive: boolean;
+  /** ISO date string (YYYY-MM-DD) of Stripe billing period start. Null for free tier. */
+  billingPeriodStart: string | null;
+}
+
+/** Fetch with retry for transient KV failures. */
+async function kvFetch(url: string, init: RequestInit): Promise<Response> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const res = await fetch(url, init);
+      if (res.ok || res.status < 500) return res;
+      lastError = new Error(`KV request failed: ${res.status}`);
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+    }
+    if (attempt < MAX_RETRIES) {
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+    }
+  }
+  throw lastError;
+}
+
+/** Write API key metadata to Cloudflare KV for fast reads at the edge. */
+export async function syncKeyToKV(keyHash: string, data: KVKeyData): Promise<void> {
+  const config = TIER_CONFIG[data.tier];
+  const value: KVKeyData = {
+    ...data,
+    rateLimit: config.rateLimit,
+    monthlyLimit: config.monthlyLimit,
+  };
+
+  const res = await kvFetch(kvUrl(keyHash), {
+    method: 'PUT',
+    headers: cfHeaders(),
+    body: JSON.stringify(value),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    console.error('KV sync failed:', res.status, body);
+    throw new Error(`Failed to sync key to KV: ${res.status}`);
+  }
+}
+
+/** Remove an API key from KV (on revoke or user deletion). */
+export async function removeKeyFromKV(keyHash: string): Promise<void> {
+  const res = await kvFetch(kvUrl(keyHash), {
+    method: 'DELETE',
+    headers: cfHeaders(),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    console.error('KV delete failed:', res.status, body);
+    throw new Error(`Failed to remove key from KV: ${res.status}`);
+  }
+}
+
+/** Update all active keys for a user when their tier changes. */
+export async function syncUserKeysToKV(
+  keys: Array<{ keyHash: string; id: string }>,
+  userId: string,
+  tier: Tier,
+  billingPeriodStart: string | null = null
+): Promise<void> {
+  await Promise.all(
+    keys.map((key) =>
+      syncKeyToKV(key.keyHash, {
+        userId,
+        keyId: key.id,
+        tier,
+        rateLimit: TIER_CONFIG[tier].rateLimit,
+        monthlyLimit: TIER_CONFIG[tier].monthlyLimit,
+        isActive: true,
+        billingPeriodStart,
+      })
+    )
+  );
+}
