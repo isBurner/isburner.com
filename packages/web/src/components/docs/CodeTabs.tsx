@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 const STORAGE_KEY = 'isburner_docs_lang';
 
@@ -9,17 +9,17 @@ interface Snippet {
   code: string;
 }
 
-export default function CodeTabs({ snippets }: { snippets: Snippet[] }) {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [copied, setCopied] = useState(false);
+function getInitialIdx(snippets: Snippet[]): number {
+  if (typeof window === 'undefined') return 0;
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return 0;
+  const idx = snippets.findIndex((s) => s.language === saved);
+  return idx >= 0 ? idx : 0;
+}
 
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const idx = snippets.findIndex((s) => s.language === saved);
-      if (idx >= 0) setActiveIdx(idx);
-    }
-  }, [snippets]);
+export default function CodeTabs({ snippets }: { snippets: Snippet[] }) {
+  const [activeIdx, setActiveIdx] = useState(() => getInitialIdx(snippets));
+  const [copied, setCopied] = useState(false);
 
   const handleTabClick = useCallback(
     (idx: number) => {
