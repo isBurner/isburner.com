@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
   // Prevent downgrades via checkout — use billing portal instead
   const TIER_ORDER: Record<string, number> = { free: 0, starter: 1, pro: 2 };
-  if (TIER_ORDER[tier] <= (TIER_ORDER[user.tier] ?? 999)) {
+  if (TIER_ORDER[tier] <= (TIER_ORDER[user.tier] ?? 0)) {
     return NextResponse.json(
       { error: 'Use the billing portal to downgrade or manage your subscription' },
       { status: 400 }
