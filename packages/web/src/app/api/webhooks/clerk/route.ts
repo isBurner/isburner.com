@@ -4,9 +4,7 @@ import type { WebhookEvent } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { users, apiKeys } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/keys';
-import { syncKeyToKV, removeKeyFromKV } from '@/lib/kv-sync';
-import { TIER_CONFIG } from '@/lib/tier-config';
+import { removeKeyFromKV } from '@/lib/kv-sync';
 import { stripe } from '@/lib/stripe';
 
 export async function POST(req: Request) {
@@ -50,42 +48,7 @@ export async function POST(req: Request) {
       const email = primaryEmail?.email_address ?? email_addresses[0]?.email_address ?? '';
 
       // Create user row (no-op if ensureUser already created it)
-      const [newUser] = await db
-        .insert(users)
-        .values({ id, email })
-        .onConflictDoNothing()
-        .returning();
-
-      // If insert was a no-op, ensureUser already created the user + default key
-      if (!newUser) break;
-
-      // Generate default API key
-      const rawKey = generateApiKey();
-      const keyHash = hashApiKey(rawKey);
-      const [inserted] = await db
-        .insert(apiKeys)
-        .values({
-          userId: id,
-          keyHash,
-          keyPrefix: getKeyPrefix(rawKey),
-          name: 'Default',
-        })
-        .returning({ id: apiKeys.id });
-
-      // Sync to KV
-      try {
-        await syncKeyToKV(keyHash, {
-          userId: id,
-          keyId: inserted.id,
-          tier: 'free',
-          rateLimit: TIER_CONFIG.free.rateLimit,
-          monthlyLimit: TIER_CONFIG.free.monthlyLimit,
-          isActive: true,
-          billingPeriodStart: null,
-        });
-      } catch (e) {
-        console.error('Failed to sync default key to KV:', e);
-      }
+      await db.insert(users).values({ id, email }).onConflictDoNothing();
       break;
     }
 

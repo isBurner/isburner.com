@@ -1,11 +1,8 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
-import { users, apiKeys } from '@/lib/db/schema';
+import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { generateApiKey, hashApiKey, getKeyPrefix } from '@/lib/keys';
-import { syncKeyToKV } from '@/lib/kv-sync';
-import { TIER_CONFIG } from '@/lib/tier-config';
 
 /**
  * Ensures the authenticated Clerk user has a corresponding database row.
@@ -35,34 +32,6 @@ export async function ensureUser() {
   // If insert was a no-op (webhook beat us), return the existing row
   if (!newUser) {
     return (await db.query.users.findFirst({ where: eq(users.id, userId) }))!;
-  }
-
-  // Generate default API key
-  const rawKey = generateApiKey();
-  const keyHash = hashApiKey(rawKey);
-  const [inserted] = await db
-    .insert(apiKeys)
-    .values({
-      userId,
-      keyHash,
-      keyPrefix: getKeyPrefix(rawKey),
-      name: 'Default',
-    })
-    .returning({ id: apiKeys.id });
-
-  // Best-effort KV sync (won't have CF credentials in local dev)
-  try {
-    await syncKeyToKV(keyHash, {
-      userId,
-      keyId: inserted.id,
-      tier: 'free',
-      rateLimit: TIER_CONFIG.free.rateLimit,
-      monthlyLimit: TIER_CONFIG.free.monthlyLimit,
-      isActive: true,
-      billingPeriodStart: null,
-    });
-  } catch {
-    // Expected to fail in local dev without Cloudflare credentials
   }
 
   return newUser;

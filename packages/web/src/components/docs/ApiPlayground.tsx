@@ -8,7 +8,7 @@ import { getSnippets } from '@/lib/code-snippets';
 import CodeTabs from './CodeTabs';
 import ResponseViewer from './ResponseViewer';
 
-const API_BASE = 'https://api.isburner.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.isburner.com';
 const STORAGE_KEY = 'isburner_playground_key';
 
 interface ApiResponse {
