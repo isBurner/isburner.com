@@ -103,12 +103,10 @@ export default function ApiPlayground() {
               placeholder="ib_live_..."
               className="w-full max-w-md rounded-lg border border-border bg-bg-surface px-4 py-2.5 font-mono text-sm text-text placeholder:text-text-faint focus:border-accent focus:outline-none"
             />
-            {keyCount > 0 && (
+            {keyCount > 0 && !apiKey && (
               <p className="mt-2 text-xs text-text-faint">
-                You have {keyCount} active key{keyCount !== 1 ? 's' : ''}.{' '}
-                <Link href="/dashboard/keys" className="text-accent hover:underline">
-                  Copy from dashboard
-                </Link>
+                You have {keyCount} active key{keyCount !== 1 ? 's' : ''}. Paste it above to get
+                started.
               </p>
             )}
           </SignedIn>
