@@ -10,6 +10,7 @@
     "build:domains": "tsx scripts/build-domains.ts"
   },
   "dependencies": {
+    "@sentry/cloudflare": "^10.39.0",
     "hono": "^4.7.0"
   },
   "devDependencies": {

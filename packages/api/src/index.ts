@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import type { AppEnv } from './types';
+import * as Sentry from '@sentry/cloudflare';
+import type { AppEnv, Env } from './types';
 import { authMiddleware } from './middleware/auth';
 import { rateLimitMiddleware } from './middleware/rate-limit';
 import { usageMiddleware } from './middleware/usage';
@@ -21,9 +22,10 @@ app.use(
   })
 );
 
-// Consistent error format
+// Capture errors in Sentry, then return consistent error format
 app.onError((err, c) => {
-  console.error('Unhandled error:', err);
+  Sentry.captureException(err);
+  c.executionCtx.waitUntil(Sentry.flush(2000));
   return c.json({ error: 'Internal server error' }, 500);
 });
 
@@ -109,4 +111,11 @@ app.get('/api/check', async (c) => {
   });
 });
 
-export default app;
+export default Sentry.withSentry<Env>(
+  (env) => ({
+    dsn: env.SENTRY_DSN,
+    tracesSampleRate: env.SENTRY_DSN ? 0.2 : 0,
+    sendDefaultPii: false,
+  }),
+  app as unknown as ExportedHandler<Env>
+) as unknown as typeof app;

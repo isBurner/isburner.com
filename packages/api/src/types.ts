@@ -1,6 +1,7 @@
 export interface Env {
   API_KEYS: KVNamespace;
   INTERNAL_SECRET: string;
+  SENTRY_DSN: string;
 }
 
 export interface ApiKeyData {
