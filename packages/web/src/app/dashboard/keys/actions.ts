@@ -16,7 +16,7 @@ export async function createApiKey(rawName: string): Promise<{ key: string } | {
   const { userId } = await auth();
   if (!userId) return { error: 'Unauthorized' };
 
-  const name = (rawName || 'Unnamed').trim().slice(0, 100);
+  const name = ((rawName || '').trim() || 'Unnamed').slice(0, 100);
 
   // Check key limit
   const existing = await db.query.apiKeys.findMany({
@@ -81,7 +81,7 @@ export async function revokeApiKey(keyId: string): Promise<{ error?: string }> {
   await db
     .update(apiKeys)
     .set({ isActive: false, revokedAt: new Date() })
-    .where(eq(apiKeys.id, keyId));
+    .where(and(eq(apiKeys.id, keyId), eq(apiKeys.userId, userId)));
 
   // Remove from KV
   try {

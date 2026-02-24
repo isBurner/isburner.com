@@ -14,9 +14,10 @@ function tierFromPriceId(priceId: string): Tier | null {
   return null;
 }
 
-/** Extract period timestamps from a subscription's first item. */
+/** Extract period timestamps from a subscription's first item. Returns null if no items. */
 function getSubPeriod(sub: Stripe.Subscription) {
   const item = sub.items.data[0];
+  if (!item) return null;
   return {
     start: new Date(item.current_period_start * 1000),
     end: new Date(item.current_period_end * 1000),
@@ -67,8 +68,11 @@ export async function POST(req: Request) {
         typeof session.customer === 'string' ? session.customer : session.customer?.id;
 
       const sub = await stripe.subscriptions.retrieve(subscriptionId);
+      const firstItem = sub.items.data[0];
+      if (!firstItem) break;
       const period = getSubPeriod(sub);
-      const tier = tierFromPriceId(sub.items.data[0].price.id);
+      if (!period) break;
+      const tier = tierFromPriceId(firstItem.price.id);
       if (!tier) break;
 
       // Update user tier, subscription ID, and customer ID
@@ -88,7 +92,7 @@ export async function POST(req: Request) {
         .values({
           id: subscriptionId,
           userId,
-          stripePriceId: sub.items.data[0].price.id,
+          stripePriceId: firstItem.price.id,
           status: sub.status as typeof subscriptions.$inferInsert.status,
           currentPeriodStart: period.start,
           currentPeriodEnd: period.end,
@@ -133,8 +137,11 @@ export async function POST(req: Request) {
       }
       if (!userId) break;
 
+      const firstItem = sub.items.data[0];
+      if (!firstItem) break;
       const period = getSubPeriod(sub);
-      const tier = tierFromPriceId(sub.items.data[0].price.id);
+      if (!period) break;
+      const tier = tierFromPriceId(firstItem.price.id);
       if (!tier) break;
 
       // Upsert subscription record (handles both new and updated)
@@ -143,7 +150,7 @@ export async function POST(req: Request) {
         .values({
           id: sub.id,
           userId,
-          stripePriceId: sub.items.data[0].price.id,
+          stripePriceId: firstItem.price.id,
           status: sub.status as typeof subscriptions.$inferInsert.status,
           currentPeriodStart: period.start,
           currentPeriodEnd: period.end,
@@ -152,7 +159,7 @@ export async function POST(req: Request) {
         .onConflictDoUpdate({
           target: subscriptions.id,
           set: {
-            stripePriceId: sub.items.data[0].price.id,
+            stripePriceId: firstItem.price.id,
             status: sub.status as typeof subscriptions.$inferInsert.status,
             currentPeriodStart: period.start,
             currentPeriodEnd: period.end,
