@@ -15,6 +15,9 @@ export default function KeyRow({ id, keyPrefix, name, isActive, createdAt }: Key
   const [isPending, startTransition] = useTransition();
 
   function handleRevoke() {
+    if (!confirm('Revoke this API key? This cannot be undone. Any integrations using this key will stop working immediately.')) {
+      return;
+    }
     startTransition(async () => {
       await revokeApiKey(id);
     });
