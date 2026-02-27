@@ -112,6 +112,8 @@ app.get('/api/check', async (c) => {
   });
 });
 
+export { app };
+
 export default Sentry.withSentry<Env>(
   (env) => ({
     dsn: env.SENTRY_DSN,
