@@ -8,7 +8,13 @@ import { usageMiddleware } from './middleware/usage';
 import internal from './routes/internal';
 import { DISPOSABLE_DOMAINS } from './data/domains';
 import { DISPOSABLE_MX_HOSTS, DISPOSABLE_MX_PATTERNS } from './data/mx-patterns';
-import { checkMxRecords } from './mx';
+import { resolveMxRecords } from './mx';
+import { analyzeLexical } from './signals/lexical';
+import { analyzeTld } from './signals/tld';
+import { detectLegitimateMx } from './signals/legitimate-mx';
+import { analyzeDnsAuth } from './signals/dns-auth';
+import { computeCompositeScore } from './signals/score';
+import type { SignalResult } from './signals/types';
 
 const app = new Hono<AppEnv>();
 
@@ -83,34 +89,61 @@ app.get('/api/check', async (c) => {
     return c.json({ error: 'Invalid email domain' }, 400);
   }
 
+  // Short-circuit: blocklist match → instant 1.0
+  if (DISPOSABLE_DOMAINS.has(domain)) {
+    return c.json({
+      email,
+      domain,
+      disposable: true,
+      score: 1.0,
+      reasons: ['Known disposable domain'],
+    });
+  }
+
   const apiKey = c.get('apiKey');
-  const reasons: string[] = [];
-  let score = 0;
+  const signals: SignalResult[] = [];
 
-  // 1. Check against known disposable domain list (sub-microsecond, in-memory Set)
-  const onBlocklist = DISPOSABLE_DOMAINS.has(domain);
-  if (onBlocklist) {
-    score = 1.0;
-    reasons.push('Known disposable domain');
-  }
+  // Free-tier signals (pure computation, ~0ms)
+  signals.push(analyzeLexical(domain));
+  signals.push(analyzeTld(domain));
 
-  // 2. MX record heuristic analysis — paid tiers only
-  if (!onBlocklist && apiKey.tier !== 'free') {
-    const mxResult = await checkMxRecords(domain);
-    if (mxResult) {
-      score = Math.max(score, 0.9);
-      reasons.push(`MX records route through ${mxResult.provider}`);
+  // Paid-tier signals (DNS lookups, parallelized)
+  if (apiKey.tier !== 'free') {
+    const [mxResolution, dnsAuth] = await Promise.all([
+      resolveMxRecords(domain),
+      analyzeDnsAuth(domain),
+    ]);
+
+    // Disposable MX signal
+    if (mxResolution?.disposableMatch) {
+      signals.push({
+        name: 'disposable_mx',
+        score: 0.4,
+        reason: `MX records route through ${mxResolution.disposableMatch.provider}`,
+      });
     }
+
+    // Legitimate MX signal (reuses same MX records, zero additional DNS cost)
+    if (mxResolution?.records) {
+      signals.push(detectLegitimateMx(mxResolution.records));
+    }
+
+    // DNS authentication maturity signal
+    signals.push(dnsAuth);
   }
+
+  const result = computeCompositeScore(signals);
 
   return c.json({
     email,
     domain,
-    disposable: score > 0.5,
-    score,
-    reasons,
+    disposable: result.score > 0.5,
+    score: Math.round(result.score * 100) / 100,
+    reasons: result.reasons,
   });
 });
+
+export { app };
 
 export default Sentry.withSentry<Env>(
   (env) => ({

@@ -10,6 +10,7 @@
     "lint": "turbo lint",
     "format": "prettier --write \"packages/*/src/**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check \"packages/*/src/**/*.{ts,tsx,css}\"",
+    "test": "turbo test",
     "db:generate": "npm run db:generate -w @isburner/web",
     "db:migrate": "npm run db:migrate -w @isburner/web",
     "db:studio": "npm run db:studio -w @isburner/web"
