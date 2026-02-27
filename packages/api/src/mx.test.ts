@@ -5,11 +5,11 @@ vi.mock('node:dns/promises', () => ({
 }));
 
 import { resolveMx } from 'node:dns/promises';
-import { checkMxRecords } from './mx';
+import { checkMxRecords, resolveMxRecords } from './mx';
 
 const mockResolveMx = vi.mocked(resolveMx);
 
-describe('checkMxRecords', () => {
+describe('checkMxRecords (deprecated wrapper)', () => {
   beforeEach(() => {
     mockResolveMx.mockReset();
   });
@@ -70,5 +70,44 @@ describe('checkMxRecords', () => {
 
     const result = await checkMxRecords('mixed.com');
     expect(result).toEqual({ provider: 'Mailinator', mxHost: 'mail.mailinator.com' });
+  });
+});
+
+describe('resolveMxRecords', () => {
+  beforeEach(() => {
+    mockResolveMx.mockReset();
+  });
+
+  it('returns records and disposableMatch when disposable MX found', async () => {
+    const records = [{ exchange: 'mail.mailinator.com', priority: 10 }];
+    mockResolveMx.mockResolvedValue(records);
+
+    const result = await resolveMxRecords('custom-domain.com');
+    expect(result).not.toBeNull();
+    expect(result!.records).toEqual(records);
+    expect(result!.disposableMatch).toEqual({
+      provider: 'Mailinator',
+      mxHost: 'mail.mailinator.com',
+    });
+  });
+
+  it('returns records with null disposableMatch for legitimate MX', async () => {
+    const records = [{ exchange: 'aspmx.l.google.com', priority: 1 }];
+    mockResolveMx.mockResolvedValue(records);
+
+    const result = await resolveMxRecords('company.com');
+    expect(result).not.toBeNull();
+    expect(result!.records).toEqual(records);
+    expect(result!.disposableMatch).toBeNull();
+  });
+
+  it('returns null on DNS failure', async () => {
+    mockResolveMx.mockRejectedValue(new Error('NXDOMAIN'));
+    expect(await resolveMxRecords('nonexistent.xyz')).toBeNull();
+  });
+
+  it('returns null on empty MX records', async () => {
+    mockResolveMx.mockResolvedValue([]);
+    expect(await resolveMxRecords('no-mx.com')).toBeNull();
   });
 });

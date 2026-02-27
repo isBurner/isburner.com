@@ -10,15 +10,21 @@ vi.mock('@sentry/cloudflare', () => ({
   flush: vi.fn(() => Promise.resolve()),
 }));
 
-// Mock MX to isolate integration tests from DNS
+// Mock DNS-dependent modules to isolate integration tests
 vi.mock('./mx', () => ({
-  checkMxRecords: vi.fn(),
+  resolveMxRecords: vi.fn(),
+}));
+
+vi.mock('./signals/dns-auth', () => ({
+  analyzeDnsAuth: vi.fn(),
 }));
 
 import { app } from './index';
-import { checkMxRecords } from './mx';
+import { resolveMxRecords } from './mx';
+import { analyzeDnsAuth } from './signals/dns-auth';
 
-const mockCheckMx = vi.mocked(checkMxRecords);
+const mockResolveMx = vi.mocked(resolveMxRecords);
+const mockDnsAuth = vi.mocked(analyzeDnsAuth);
 
 /** SHA-256 hash (matches auth middleware implementation). */
 async function sha256(input: string): Promise<string> {
@@ -63,7 +69,11 @@ describe('API integration', () => {
     kv = createMockKV();
     env = createTestEnv({ kv });
     execCtx = createMockExecutionCtx();
-    mockCheckMx.mockReset();
+    mockResolveMx.mockReset();
+    mockDnsAuth.mockReset();
+
+    // Default: DNS auth returns neutral
+    mockDnsAuth.mockResolvedValue({ name: 'dns_auth', score: 0, reason: null });
 
     // Seed a valid free-tier key
     kv._store.set(TEST_KEY_HASH, JSON.stringify(FREE_KEY_DATA));
@@ -151,7 +161,8 @@ describe('API integration', () => {
       expect(body.domain).toBe('mailinator.com');
     });
 
-    it('returns disposable: false for a legitimate domain', async () => {
+    it('returns disposable: false for a legitimate domain (free tier)', async () => {
+      // gmail.com: SLD 'gmail' = 5 chars (below entropy threshold), .com = low risk
       const res = await req('/api/check?email=user@gmail.com');
       const body = await res.json();
       expect(body.disposable).toBe(false);
@@ -165,45 +176,129 @@ describe('API integration', () => {
       expect(body.disposable).toBe(true);
       expect(body.domain).toBe('mailinator.com');
     });
-  });
 
-  describe('GET /api/check — MX heuristics', () => {
-    it('skips MX check for free tier', async () => {
-      await req('/api/check?email=user@unknown-domain.com');
-      expect(mockCheckMx).not.toHaveBeenCalled();
-    });
-
-    it('runs MX check for starter tier when domain is not on blocklist', async () => {
+    it('short-circuits on blocklist hit without running MX or DNS auth', async () => {
       kv._store.set(TEST_KEY_HASH, JSON.stringify(STARTER_KEY_DATA));
-      mockCheckMx.mockResolvedValue({ provider: 'Mailinator', mxHost: 'mail.mailinator.com' });
-
-      const res = await req('/api/check?email=user@custom-domain.com');
-      const body = await res.json();
-
-      expect(mockCheckMx).toHaveBeenCalledWith('custom-domain.com');
-      expect(body.disposable).toBe(true);
-      expect(body.score).toBe(0.9);
-      expect(body.reasons[0]).toContain('Mailinator');
-    });
-
-    it('skips MX check when domain IS on blocklist', async () => {
-      kv._store.set(TEST_KEY_HASH, JSON.stringify(STARTER_KEY_DATA));
-
       const res = await req('/api/check?email=user@mailinator.com');
       const body = await res.json();
 
-      expect(mockCheckMx).not.toHaveBeenCalled();
+      expect(mockResolveMx).not.toHaveBeenCalled();
+      expect(mockDnsAuth).not.toHaveBeenCalled();
       expect(body.score).toBe(1);
+    });
+  });
+
+  describe('GET /api/check — MX heuristics', () => {
+    it('skips MX and DNS auth for free tier', async () => {
+      await req('/api/check?email=user@acme.com');
+      expect(mockResolveMx).not.toHaveBeenCalled();
+      expect(mockDnsAuth).not.toHaveBeenCalled();
+    });
+
+    it('runs MX check for starter tier and includes disposable MX score', async () => {
+      kv._store.set(TEST_KEY_HASH, JSON.stringify(STARTER_KEY_DATA));
+      mockResolveMx.mockResolvedValue({
+        records: [{ exchange: 'mail.mailinator.com', priority: 10 }],
+        disposableMatch: { provider: 'Mailinator', mxHost: 'mail.mailinator.com' },
+      });
+
+      // Use 'acme.com' — short SLD (4 chars, below entropy threshold), .com = 0 TLD risk
+      const res = await req('/api/check?email=user@acme.com');
+      const body = await res.json();
+
+      expect(mockResolveMx).toHaveBeenCalledWith('acme.com');
+      expect(body.disposable).toBe(false); // 0.4 < 0.5
+      expect(body.score).toBe(0.4);
+      expect(body.reasons).toContainEqual(expect.stringContaining('Mailinator'));
     });
 
     it('returns disposable: false when MX check returns null', async () => {
       kv._store.set(TEST_KEY_HASH, JSON.stringify(STARTER_KEY_DATA));
-      mockCheckMx.mockResolvedValue(null);
+      mockResolveMx.mockResolvedValue(null);
 
-      const res = await req('/api/check?email=user@legit-domain.com');
+      const res = await req('/api/check?email=user@acme.com');
       const body = await res.json();
       expect(body.disposable).toBe(false);
       expect(body.score).toBe(0);
+    });
+  });
+
+  describe('GET /api/check — composite scoring', () => {
+    it('free tier gets lexical + TLD signals only', async () => {
+      // 'temp' keyword triggers lexical (0.10), .tk triggers TLD (0.30) = 0.40 total
+      const res = await req('/api/check?email=user@tempbox.tk');
+      const body = await res.json();
+
+      expect(body.score).toBe(0.4);
+      expect(body.disposable).toBe(false); // 0.40 < 0.50 threshold
+      expect(body.reasons.some((r: string) => r.includes('temp'))).toBe(true);
+      expect(body.reasons.some((r: string) => r.includes('.tk'))).toBe(true);
+      // No DNS signals on free tier
+      expect(mockResolveMx).not.toHaveBeenCalled();
+      expect(mockDnsAuth).not.toHaveBeenCalled();
+    });
+
+    it('legitimate MX provider reduces score', async () => {
+      kv._store.set(TEST_KEY_HASH, JSON.stringify(STARTER_KEY_DATA));
+      mockResolveMx.mockResolvedValue({
+        records: [{ exchange: 'aspmx.l.google.com', priority: 1 }],
+        disposableMatch: null,
+      });
+      // SPF + strict DMARC = -0.10
+      mockDnsAuth.mockResolvedValue({
+        name: 'dns_auth',
+        score: -0.1,
+        reason: 'SPF + strict DMARC policy (reject/quarantine)',
+      });
+
+      // .xyz = medium TLD risk (0.15), but Google MX (-0.3) + strict DMARC (-0.1) pulls it down
+      const res = await req('/api/check?email=user@shop.xyz');
+      const body = await res.json();
+
+      expect(body.disposable).toBe(false);
+      expect(body.score).toBe(0); // 0.15 + (-0.3) + (-0.1) = -0.25, clamped to 0
+    });
+
+    it('stacked signals cross the threshold', async () => {
+      kv._store.set(TEST_KEY_HASH, JSON.stringify(STARTER_KEY_DATA));
+      mockResolveMx.mockResolvedValue({
+        records: [{ exchange: 'mail.mailinator.com', priority: 10 }],
+        disposableMatch: { provider: 'Mailinator', mxHost: 'mail.mailinator.com' },
+      });
+      // No SPF/DMARC = +0.20
+      mockDnsAuth.mockResolvedValue({
+        name: 'dns_auth',
+        score: 0.2,
+        reason: 'No SPF or DMARC records (no email authentication)',
+      });
+
+      // 'acme.com': lexical=0, tld=0, disposable_mx=0.4, dns_auth=0.2 = 0.60
+      const res = await req('/api/check?email=user@acme.com');
+      const body = await res.json();
+
+      expect(body.disposable).toBe(true);
+      expect(body.score).toBe(0.6);
+      expect(body.reasons).toContainEqual(expect.stringContaining('Mailinator'));
+      expect(body.reasons).toContainEqual(expect.stringContaining('No SPF'));
+    });
+
+    it('rounds score to 2 decimal places', async () => {
+      // .xyz TLD gives 0.15 — already clean, but verifies rounding doesn't corrupt
+      const res = await req('/api/check?email=user@shop.xyz');
+      const body = await res.json();
+      const decimalPlaces = body.score.toString().split('.')[1]?.length ?? 0;
+      expect(decimalPlaces).toBeLessThanOrEqual(2);
+    });
+
+    it('response shape includes all expected fields', async () => {
+      const res = await req('/api/check?email=user@acme.com');
+      const body = await res.json();
+      expect(body).toHaveProperty('email');
+      expect(body).toHaveProperty('domain');
+      expect(body).toHaveProperty('disposable');
+      expect(body).toHaveProperty('score');
+      expect(body).toHaveProperty('reasons');
+      expect(Array.isArray(body.reasons)).toBe(true);
     });
   });
 });

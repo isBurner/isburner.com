@@ -1,32 +1,20 @@
 import { resolveMx } from 'node:dns/promises';
 import { DISPOSABLE_MX_HOSTS, DISPOSABLE_MX_PATTERNS } from './data/mx-patterns';
 
-type MxMatch = {
+export type MxMatch = {
   provider: string;
   mxHost: string;
 };
 
-/**
- * Checks a domain's MX records against known disposable email infrastructure.
- * Returns the matching provider info if found, null otherwise.
- *
- * This catches custom domains that route mail through known disposable services
- * (e.g., a user registers "my-fake-domain.com" but points MX to mailinator).
- */
-export async function checkMxRecords(domain: string): Promise<MxMatch | null> {
-  let mxRecords: { exchange: string; priority: number }[];
+export type MxResolution = {
+  records: { exchange: string; priority: number }[];
+  disposableMatch: MxMatch | null;
+};
 
-  try {
-    mxRecords = await resolveMx(domain);
-  } catch {
-    // DNS failure (NXDOMAIN, timeout, etc.) — can't determine, return null
-    return null;
-  }
-
-  if (!mxRecords || mxRecords.length === 0) {
-    return null;
-  }
-
+/** Pure function: checks resolved MX records against known disposable hosts/patterns. */
+function findDisposableMx(
+  mxRecords: { exchange: string; priority: number }[]
+): MxMatch | null {
   for (const record of mxRecords) {
     const mx = record.exchange.toLowerCase().replace(/\.$/, '');
 
@@ -45,4 +33,33 @@ export async function checkMxRecords(domain: string): Promise<MxMatch | null> {
   }
 
   return null;
+}
+
+/**
+ * Resolves MX records for a domain and checks against known disposable infrastructure.
+ * Returns both the raw records (for use by other signals like legitimate-MX detection)
+ * and the disposable match result.
+ */
+export async function resolveMxRecords(domain: string): Promise<MxResolution | null> {
+  let mxRecords: { exchange: string; priority: number }[];
+
+  try {
+    mxRecords = await resolveMx(domain);
+  } catch {
+    return null;
+  }
+
+  if (!mxRecords || mxRecords.length === 0) {
+    return null;
+  }
+
+  return { records: mxRecords, disposableMatch: findDisposableMx(mxRecords) };
+}
+
+/**
+ * @deprecated Use resolveMxRecords() instead for access to raw MX records.
+ */
+export async function checkMxRecords(domain: string): Promise<MxMatch | null> {
+  const result = await resolveMxRecords(domain);
+  return result?.disposableMatch ?? null;
 }
